@@ -7,14 +7,14 @@ An IoT-enabled fire safety solution featuring:
 
 ### 📌 Project Overview
 - **STM32 Sensor Node** continuously monitor all sensors and communicates with the **ESP32 FACP** via **SPI**.
-- **FACP conducts heartbeat checks** - pinging the Sensor Nodefor health status, receiving acknowledgments in normal operation.
+- **FACP conducts heartbeat checks** - pings the Sensor Node, receiving acknowledgments in normal operation.
 - On anomaly, **Sensor Node raises an interrupt**, prompting the FACP to **request detailed sensor readings**.
 - **Cloud reporting**: FACP transmits health metrics and emergency events via **MQTT (AWS IoT Core)**.
 
 ### 🔧 Key Features
-✅**Modular & Scalable Design**
-🔹Abstract Factory Pattern in C++ for dynamic sensor management.
-🔹Plug-and-play expandability: Add more Sensor Nodes to the FACP for larger deployments.
+✅ **Modular & Scalable Design**
+🔹 Abstract Factory Pattern in C++ for dynamic sensor management.
+🔹 Plug-and-play expandability: Add more Sensor Nodes to the FACP for larger deployments.
 
 🔹**Multi-Sensor Monitoring ( Sensor Node STM32)**
 🔥Fire Detection: Temperature, Smoke, Gas, Flame
