@@ -15,36 +15,3 @@ An IoT-enabled fire safety solution featuring:
 ✅ **Modular & Scalable Design**
 Abstract
 Plug
- 🔹 Abstract Factory Pattern in C++ for dynamic sensor management.
- 🔹 Plug-and-play expandability: Add more Sensor Nodes to the FACP for larger deployments.
-
-🔹**Multi-Sensor Monitoring ( Sensor Node STM32)**
-🔥Fire Detection: Temperature, Smoke, Gas, Flame
-💧Environmental: Humidity, VOC
-♨️Smart Sensing: Ambient Light, Thermal IR 
-***(Supports up to 8 sensors per node with configurable thresholds)***
-
-🔹**Robust Communication Stack**
-- **SPI**:
- - Heartbeat checks (FACP → Node → FACP)
- - On-demand sensor data transmission (Node → FACP)
-- **Hardware Interrupt Line**:
- - Low-latency anomaly alerts (Node → FACP)
-- **UART Debugging**:
- - Serial logs for sensor status, diagnostics, and development.
-
-🔹**FACP Node (ESP32) - Intelligent Gateway**
-- **Active Monitoring**: Periodically checks sensor node health via SPI.
-- **Event-Driven Response**: Instantly reacts to interrupt-based anomaly alerts from sensor nodes.
-- **Selective Data Fetch**: Requests detailed sensor readings only during critical events.
-- **Scalable Architecture**: Supports daisy-chaining multiple sensor nodes for large-scale deployments.
-
-🔹**Edge Processing – Local Intelligence**
-- **On-Node Detection**: Anomalies are identified at the sensor node level.
-- **Smart Escalation**: FACP forwards only validated emergencies to the cloud, minimizing false alerts.
-- **Bandwidth Efficiency**: Raw data stays local; only processed alerts/health stats are transmitted.
-
-🔹**Cloud Integration – Real-Time Visibility**
-- **MQTT Pub/Sub**: Lightweight AWS IoT Core messaging for live sensor status and emergency alerts.
-- **Remote Dashboard**: Web-based monitoring with historical logs and alert triaging.
-- **OTA Updates**: Firmware/configuration pushed to FACP and nodes via cloud orchestration.
