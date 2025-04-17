@@ -18,8 +18,8 @@ An IoT-enabled fire safety solution featuring:
 🔹**Multi-Sensor Monitoring ( Sensor Node STM32)**
 - Fire Detection: Temperature, Smoke, Gas, Flame
 - Environmental: Humidity, VOC
-- Smart Sensing: Ambient Light, Thermal IR
-***(Supports up to 8 sensors per node with configurable thresholds)***
+- Smart Sensing: Ambient Light, Thermal IR 
+***(Supports up to 8 sensors per node with configurable thresholds)***<\n>
 🔹**Robust Communication Stack**
 - **SPI**:
  - Heartbeat checks (FACP → Node → FACP)
