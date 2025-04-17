@@ -13,13 +13,13 @@ An IoT-enabled fire safety solution featuring:
 
 ### 🔧 Key Features
 🔹**Modular & Scalable Design**
-- Abstract Factory Pattern in C++ for dynamic sensor management.
-- Plug-and-play expandability: Add more Sensor Nodes to the FACP for larger deployments.
+Abstract Factory Pattern in C++ for dynamic sensor management.
+Plug-and-play expandability: Add more Sensor Nodes to the FACP for larger deployments.
 
 🔹**Multi-Sensor Monitoring ( Sensor Node STM32)**
-- Fire Detection: Temperature, Smoke, Gas, Flame
-- Environmental: Humidity, VOC
-- Smart Sensing: Ambient Light, Thermal IR 
+🔥Fire Detection: Temperature, Smoke, Gas, Flame
+💧Environmental: Humidity, VOC
+♨️Smart Sensing: Ambient Light, Thermal IR 
 ***(Supports up to 8 sensors per node with configurable thresholds)***
 
 🔹**Robust Communication Stack**
