@@ -13,13 +13,13 @@ An IoT-enabled fire safety solution featuring:
 
 ### 🔧 Key Features
 ✅ **Modular & Scalable Design**  
-&nbsp;🔹 **Abstract Factory Pattern** in C++ for dynamic sensor management.  
-&nbsp;🔹 Plug-and-play expandability: Add more Sensor Nodes to the FACP for larger deployments.  
+&nbsp;&nbsp;🔹 **Abstract Factory Pattern** in C++ for dynamic sensor management.  
+&nbsp;&nbsp;🔹 Plug-and-play expandability: Add more Sensor Nodes to the FACP for larger deployments.  
 ✅ **Multi-Sensor Monitoring (Sensor Node STM32)**  
-&nbsp;🔥Fire Detection: Temperature, Smoke, Gas, Flame  
-&nbsp;💧Environmental: Humidity, VOC  
-&nbsp;♨️Smart Sensing: Ambient Light, Thermal IR  
-&nbsp;***(Supports up to 8 sensors per node with configurable thresholds)***  
+&nbsp;&nbsp;🔥Fire Detection: Temperature, Smoke, Gas, Flame  
+&nbsp;&nbsp;💧Environmental: Humidity, VOC  
+&nbsp;&nbsp;♨️Smart Sensing: Ambient Light, Thermal IR  
+&nbsp;&nbsp;***(Supports up to 8 sensors per node with configurable thresholds)***  
 ✅ **Robust Communication Stack**  
 🔹 **SPI**:  
   - Heartbeat checks (FACP → Node → FACP)  
@@ -30,7 +30,7 @@ An IoT-enabled fire safety solution featuring:
   - Serial logs for sensor status, diagnostics, and development.  
 ✅ **Fire Alarm Control Panel Node (ESP32)**  
   - **Active Monitoring**: Periodically checks sensor node health via SPI.  
-  - **Event-Driven Response**: Instantly reacts to interrupt-based anomaly alerts from sensor nodes.  
+  - **Event-Driven Response**: Instantly reacts to interrupt-based anomaly alerts from sensor nodes. 
   - **Selective Data Fetch**: Requests detailed sensor readings only during critical events.  
   - **Scalable Architecture**: Supports daisy-chaining multiple sensor nodes for large-scale deployments.  
 ✅ **Edge Processing – Local Intelligence**  
