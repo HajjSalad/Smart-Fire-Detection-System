@@ -55,7 +55,7 @@ An IoT-enabled fire safety solution featuring:
 &nbsp;&nbsp;&nbsp;⎔ Terraform  
 &nbsp;&nbsp;&nbsp;⎔ AWS Cloud  
 
-#### &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Hardware Connections**
+#### **Hardware Connections**
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| **STM32 PIN** | **Interface**  | **ESP32 Pin** |
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|---------------|----------------|---------------|
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|     PA6       |     SPI MISO   |    GPIO19     |
