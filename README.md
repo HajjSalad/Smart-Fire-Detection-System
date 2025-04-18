@@ -15,3 +15,6 @@ An IoT-enabled fire safety solution featuring:
 ✅ **Modular & Scalable Design**
 Abstract
 Plug
+jdjdd
+hdhdjdj
+hddjdjd
