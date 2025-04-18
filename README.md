@@ -55,15 +55,15 @@ An IoT-enabled fire safety solution featuring:
 &nbsp;&nbsp;&nbsp;⎔ Terraform  
 &nbsp;&nbsp;&nbsp;⎔ AWS Cloud  
 
-#### Hardware Connections
-| **STM32 PIN** | **Interface**  | **ESP32 Pin** |
-|---------------|----------------|---------------|
-|     PA6       |     SPI MISO   |    GPIO19     |
-|     PA7       |     SPI MOSI   |    GPIO23     |
-|     PA4       |     SPI NSS    |    GPIO5      |
-|     PA5       |     SPI SCK    |    GPIO18     |
-|     PB6       | GPIO Interrupt |    GPIO22     |
-|     GND       |      GND       |     GND       |
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#### Hardware Connections
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| **STM32 PIN** | **Interface**  | **ESP32 Pin** |
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|---------------|----------------|---------------|
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|     PA6       |     SPI MISO   |    GPIO19     |
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|     PA7       |     SPI MOSI   |    GPIO23     |
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|     PA4       |     SPI NSS    |    GPIO5      |
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|     PA5       |     SPI SCK    |    GPIO18     |
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|     PB6       | GPIO Interrupt |    GPIO22     |
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|     GND       |      GND       |     GND       |
 
 ---
 #### 📂 Project Code Structure
