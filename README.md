@@ -16,8 +16,10 @@ An IoT-enabled fire safety solution featuring:
 ✅ **Vibration** (MPU6050)  
 ✅ **Distance/Motion Detection** (HC-SR04)  
 ✅ **Additional Analog Sensors via SPI ADC**
-✅ **Modular & Scalable Design**
-NHHyyd
-hhjdj
-hhhf
-lllld
+✅ **Modular & Scalable Design**  
+NHHyyd  
+hhjdj  
+hhhf  
+lllld  
+ffff  
+fff
