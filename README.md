@@ -33,12 +33,14 @@ An IoT-enabled fire safety solution featuring:
 
 ✅ **Fire Alarm Control Panel Node (ESP32)**  
 &nbsp;&nbsp;&nbsp;&nbsp;• **Active Monitoring**: Periodically checks sensor node health via SPI.  
-&nbsp;&nbsp;&nbsp;&nbsp;• **Event-Driven Response**: Instantly reacts to interrupt-based anomaly alerts from sensor nodes. 
+&nbsp;&nbsp;&nbsp;&nbsp;• **Event-Driven Response**: Instantly reacts to interrupt-based anomaly alerts from sensor nodes.  
 &nbsp;&nbsp;&nbsp;&nbsp;• **Selective Data Fetch**: Requests detailed sensor readings only during critical events.  
 &nbsp;&nbsp;&nbsp;&nbsp;• **Scalable Architecture**: Supports daisy-chaining multiple sensor nodes for large-scale deployments.  
+
 ✅ **Edge Processing – Local Intelligence**  
 &nbsp;&nbsp;&nbsp;&nbsp;• **On-Node Detection**: Anomalies are identified at the sensor node level.  
 &nbsp;&nbsp;&nbsp;&nbsp;• **Bandwidth Efficiency**: Raw data stays local; only processed alerts/health stats are transmitted.  
+
 ✅ **Cloud Integration – Real-Time Visibility**  
 &nbsp;&nbsp;&nbsp;&nbsp;• **MQTT Pub/Sub**: Lightweight AWS IoT Core messaging for live sensor status and emergency alerts.  
 &nbsp;&nbsp;&nbsp;&nbsp;• **Remote Dashboard**: Web-based monitoring with historical logs and alert triaging.  
