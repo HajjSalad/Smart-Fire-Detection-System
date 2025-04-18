@@ -50,7 +50,7 @@ An IoT-enabled fire safety solution featuring:
 &nbsp;&nbsp;&nbsp;⎔ OpenOCD - Flashing and debugging via SWD     
 &nbsp;&nbsp;&nbsp;⎔ Makefile - Builds and links embedded C code  
 
-🌐 **FACP / Cloud Gateway**
+🌐 **FACP / Cloud Gateway**   
 &nbsp;&nbsp;&nbsp;⎔ ESP-IDF - Framework for ESP32 development   
 &nbsp;&nbsp;&nbsp;⎔ VS Code - Development and debugging for the gateway   
 &nbsp;&nbsp;&nbsp;⎔ Terraform - Automates AWS infrastructure setup    
