@@ -19,3 +19,5 @@ An IoT-enabled fire safety solution featuring:
 ✅ **Modular & Scalable Design**
 NHHyyd
 hhjdj
+hhhf
+lllld
