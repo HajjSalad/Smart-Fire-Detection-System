@@ -15,6 +15,7 @@ An IoT-enabled fire safety solution featuring:
 ✅ **Modular & Scalable Design**  
 &nbsp;&nbsp;&nbsp;🔹 **Abstract Factory Pattern** in C++ for dynamic sensor management.  
 &nbsp;&nbsp;&nbsp;🔹 Plug-and-play expandability: Add more Sensor Nodes to the FACP for larger deployments.  
+
 ✅ **Multi-Sensor Monitoring (Sensor Node STM32)**  
 &nbsp;&nbsp;&nbsp;🔥Fire Detection: Temperature, Smoke, Gas, Flame  
 &nbsp;&nbsp;&nbsp;💧Environmental: Humidity, VOC  
@@ -22,12 +23,12 @@ An IoT-enabled fire safety solution featuring:
 &nbsp;&nbsp;&nbsp;***(Supports up to 8 sensors per node with configurable thresholds)***  
 ✅ **Robust Communication Stack**  
 🔹 **SPI**:  
-&nbsp;&nbsp;&nbsp;&nbsp;- Heartbeat checks (FACP → Node → FACP)  
-&nbsp;&nbsp;&nbsp;&nbsp;- On-demand sensor data transmission (Node → FACP)     
+&nbsp;&nbsp;&nbsp;&nbsp;• Heartbeat checks (FACP → Node → FACP)  
+&nbsp;&nbsp;&nbsp;&nbsp;• On-demand sensor data transmission (Node → FACP)     
 🔹 **Hardware Interrupt Line**:  
-&nbsp;&nbsp;&nbsp;&nbsp;- Low-latency anomaly alerts (Node → FACP)  
+&nbsp;&nbsp;&nbsp;&nbsp;• Low-latency anomaly alerts (Node → FACP)  
 🔹 **UART Debugging**:  
-&nbsp;&nbsp;&nbsp;&nbsp;- Serial logs for sensor status, diagnostics, and development.  
+&nbsp;&nbsp;&nbsp;&nbsp;• Serial logs for sensor status, diagnostics, and development.  
 ✅ **Fire Alarm Control Panel Node (ESP32)**  
   - **Active Monitoring**: Periodically checks sensor node health via SPI.  
   - **Event-Driven Response**: Instantly reacts to interrupt-based anomaly alerts from sensor nodes. 
