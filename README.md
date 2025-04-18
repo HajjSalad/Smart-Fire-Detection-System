@@ -44,18 +44,18 @@ An IoT-enabled fire safety solution featuring:
 ```
 [Sensors] → [STM32 Sensor Node] → [SPI] → [ESP32 FACP/Cloud Node] → [MQTT] → [Cloud Dashboard]
 ```
-#### 🛠️ Tools and Software
-⏧**Sensor Node**  
+### 🛠️ Tools and Software
+𐂷 **Sensor Node**  
 &nbsp;&nbsp;&nbsp;⎔ **VS Code** - Code editor for STM32 firmware development       
 &nbsp;&nbsp;&nbsp;⎔ OpenOCD - Flashing and debugging via SWD     
 &nbsp;&nbsp;&nbsp;⎔ Makefile - Builds and links embedded C code    
-🌐**FACP / Cloud Gateway**
+🌐 **FACP / Cloud Gateway**
 &nbsp;&nbsp;&nbsp;⎔ ESP-IDF - Framework for ESP32 development   
 &nbsp;&nbsp;&nbsp;⎔ VS Code - Development and debugging for the gateway   
 &nbsp;&nbsp;&nbsp;⎔ Terraform - Automates AWS infrastructure setup    
 &nbsp;&nbsp;&nbsp;⎔ AWS Cloud - Hosts IoT Core, Timestream, and monitoring services  
 
-#### **Hardware Connections**
+### **Hardware Connections**
 | **STM32 PIN** | **Interface**  | **ESP32 Pin** |
 |---------------|----------------|---------------|
 |     PA6       |     SPI MISO   |    GPIO19     |
@@ -66,7 +66,7 @@ An IoT-enabled fire safety solution featuring:
 |     GND       |      GND       |     GND       |
 
 ---
-#### 📂 Project Code Structure
+### 📂 Project Code Structure
 ```
 📁 Smart-Fire-Detection-System/
 │── 📁 stm32_sensor_node/
