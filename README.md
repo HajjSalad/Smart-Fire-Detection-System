@@ -14,7 +14,8 @@ An IoT-enabled fire safety solution featuring:
 ### 🔧 Key Features
 ✅ **Modular & Scalable Design**
 Abstract
-Plug
-jdjdd
-hdhdjdj
-hddjdjd
+This project is designed to monitor critical **industrial parameters** such as:
+✅ **Temperature & Humidity** (SHT31)  
+✅ **Vibration** (MPU6050)  
+✅ **Distance/Motion Detection** (HC-SR04)  
+✅ **Additional Analog Sensors via SPI ADC**  
