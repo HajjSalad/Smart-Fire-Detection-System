@@ -46,14 +46,14 @@ An IoT-enabled fire safety solution featuring:
 ```
 #### 🛠️ Tools and Software
 ⏧**Sensor Node**  
-&nbsp;&nbsp;&nbsp;⎔ VS Code   
-&nbsp;&nbsp;&nbsp;⎔ OpenOCD   
-&nbsp;&nbsp;&nbsp;⎔ Makefile   
+&nbsp;&nbsp;&nbsp;⎔ **VS Code** - Code editor for STM32 firmware development       
+&nbsp;&nbsp;&nbsp;⎔ OpenOCD - Flashing and debugging via SWD     
+&nbsp;&nbsp;&nbsp;⎔ Makefile - Builds and links embedded C code    
 🌐**FACP / Cloud Gateway**
-&nbsp;&nbsp;&nbsp;⎔ ESP-IDF  
-&nbsp;&nbsp;&nbsp;⎔ VS Code  
-&nbsp;&nbsp;&nbsp;⎔ Terraform  
-&nbsp;&nbsp;&nbsp;⎔ AWS Cloud  
+&nbsp;&nbsp;&nbsp;⎔ ESP-IDF - Framework for ESP32 development   
+&nbsp;&nbsp;&nbsp;⎔ VS Code - Development and debugging for the gateway   
+&nbsp;&nbsp;&nbsp;⎔ Terraform - Automates AWS infrastructure setup    
+&nbsp;&nbsp;&nbsp;⎔ AWS Cloud - Hosts IoT Core, Timestream, and monitoring services  
 
 #### **Hardware Connections**
 | **STM32 PIN** | **Interface**  | **ESP32 Pin** |
@@ -75,12 +75,17 @@ An IoT-enabled fire safety solution featuring:
 │   ├── 📄 sensor.cpp / .h      (Base sensor classes and interfaces)
 │   ├── 📄 wrapper.cpp / .h     (Hardware abstraction layer wrappers)
 │   ├── 📄 simulate.c / .h      (Sensor data simulation)
-│   ├── 📄 spi.c / .h           (SPI Communication)
+│   ├── 📄 spi.c / .h           (SPI & GPIO Interrupt Communication)
 │   ├── 📄 uart.c / .h          (UART Communication)
 │   ├── 📄 systick.c / .h       (Systick Timer)
 │   ├── 📄 Makefile             (Build system configuration)
 │── 📁 esp32_facp_cloud_node/
-│   ├── 📄 main.c               (WiFi, MQTT)
+│   ├── 📄 main.c               (Entry point of the program, Tasks)
+│   ├── 📄 spi.c / .h           (SPI & GPIO Interrupt Communication )
+│   ├── 📄 uart.c / .h          (UART Communication)
+│   ├── 📄 wifi.c / .h          (WiFi Connectivity)
+│   ├── 📄 cloud.c / .h         (MQTT for AWS Connectivity)
+│   ├── 📄 CMakeLists.txt       (Build system configuration)
 │── 📄 README.md  (Documentation)
 ```
 
