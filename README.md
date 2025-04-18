@@ -13,7 +13,8 @@ An IoT-enabled fire safety solution featuring:
 
 ### 🔧 Key Features
 ✅ **Modular & Scalable Design**
-Abstract
+🔹 Abstract Factory Pattern in C++ for dynamic sensor management.
+🔹 Plug-and-play expandability: Add more Sensor Nodes to the FACP for 
 This project is designed to monitor critical **industrial parameters** such as:
 ✅ **Temperature & Humidity** (SHT31)  
 ✅ **Vibration** (MPU6050)  
