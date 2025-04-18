@@ -48,7 +48,8 @@ An IoT-enabled fire safety solution featuring:
 𐂷 **Sensor Node**  
 &nbsp;&nbsp;&nbsp;⎔ **VS Code** - Code editor for STM32 firmware development       
 &nbsp;&nbsp;&nbsp;⎔ OpenOCD - Flashing and debugging via SWD     
-&nbsp;&nbsp;&nbsp;⎔ Makefile - Builds and links embedded C code    
+&nbsp;&nbsp;&nbsp;⎔ Makefile - Builds and links embedded C code  
+
 🌐 **FACP / Cloud Gateway**
 &nbsp;&nbsp;&nbsp;⎔ ESP-IDF - Framework for ESP32 development   
 &nbsp;&nbsp;&nbsp;⎔ VS Code - Development and debugging for the gateway   
