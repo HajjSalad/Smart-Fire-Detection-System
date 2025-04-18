@@ -38,6 +38,7 @@ An IoT-enabled fire safety solution featuring:
 
 ✅ **Edge Processing**: Anomalies are identified at the sensor node level.   
 ✅ **Cloud Integration**: Lightweight AWS IoT Core messaging for live sensor status and emergency alerts.  
+
 ---
 ### 🏗 System Architecture
 ```
