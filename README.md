@@ -23,7 +23,7 @@ An IoT-enabled fire safety solution featuring:
 ✅ **Robust Communication Stack**  
 🔹 **SPI**:  
   - Heartbeat checks (FACP → Node → FACP)  
-  - On-demand sensor data transmission (Node → FACP)  
+  - On-demand sensor data transmission (Node → FACP)     
 🔹 **Hardware Interrupt Line**:  
   - Low-latency anomaly alerts (Node → FACP)  
 🔹 **UART Debugging**:  
