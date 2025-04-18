@@ -4,13 +4,13 @@ An IoT-enabled fire safety solution featuring:
 - **ESP32 Fire Alarm Control Panel** serving as both gateway and cloud interface
 - **Modular Architecture** using C++ Abstract Factory Pattern for flexible sensor management
 - **Edge-to-Cloud Integration** with AWS IoT for remote monitoring and alerts
-
+---
 ### 📌 Project Overview
 - **STM32 Sensor Node** continuously monitor all sensors and communicates with the **ESP32 FACP** via **SPI**.
 - **FACP conducts heartbeat checks** - pings the Sensor Node, receiving acknowledgments in normal operation.
 - On anomaly, **Sensor Node raises an interrupt**, prompting the FACP to **request detailed sensor readings**.
 - **Cloud reporting**: FACP transmits health metrics and emergency events via **MQTT (AWS IoT Core)**.
-
+---
 ### 🔧 Key Features
 ✅ **Modular & Scalable Design**  
 &nbsp;&nbsp;&nbsp;🔹 **Abstract Factory Pattern** in C++ for dynamic sensor management.  
@@ -38,5 +38,56 @@ An IoT-enabled fire safety solution featuring:
 
 ✅ **Edge Processing**: Anomalies are identified at the sensor node level.   
 ✅ **Cloud Integration**: Lightweight AWS IoT Core messaging for live sensor status and emergency alerts.  
+---
+### 🏗 System Architecture
+```
+[Sensors] → [STM32 Sensor Node] → [SPI] → [ESP32 FACP/Cloud Node] → [MQTT] → [Cloud Dashboard]
+```
+#### 🛠️ Tools and Software
+⏧**Sensor Node**  
+&nbsp;&nbsp;&nbsp;⎔ VS Code   
+&nbsp;&nbsp;&nbsp;⎔ OpenOCD   
+&nbsp;&nbsp;&nbsp;⎔ Makefile   
+🌐**FACP / Cloud Gateway**
+&nbsp;&nbsp;&nbsp;⎔ ESP-IDF  
+&nbsp;&nbsp;&nbsp;⎔ VS Code  
+&nbsp;&nbsp;&nbsp;⎔ Terraform  
+&nbsp;&nbsp;&nbsp;⎔ AWS Cloud  
+
+#### Hardware Connections
+| **STM32 PIN** | **Interface**  | **ESP32 Pin** |
+|---------------|----------------|---------------|
+|     PA6       |     SPI MISO   |    GPIO19     |
+|     PA7       |     SPI MOSI   |    GPIO23     |
+|     PA4       |     SPI NSS    |    GPIO5      |
+|     PA5       |     SPI SCK    |    GPIO18     |
+|     PB6       | GPIO Interrupt |    GPIO22     |
+|     GND       |      GND       |     GND       |
+
+---
+#### 📂 Project Code Structure
+```
+📁 Smart-Fire-Detection-System/
+│── 📁 stm32_sensor_node/
+│   ├── 📄 main.c               (Entry point of the program)
+│   ├── 📄 factory.cpp / .h     (Abstract Factory pattern implementation)
+│   ├── 📄 sensor.cpp / .h      (Base sensor classes and interfaces)
+│   ├── 📄 wrapper.cpp / .h     (Hardware abstraction layer wrappers)
+│   ├── 📄 simulate.c / .h      (Sensor data simulation)
+│   ├── 📄 spi.c / .h           (SPI Communication)
+│   ├── 📄 uart.c / .h          (UART Communication)
+│   ├── 📄 systick.c / .h       (Systick Timer)
+│   ├── 📄 Makefile             (Build system configuration)
+│── 📁 esp32_facp_cloud_node/
+│   ├── 📄 main.c               (WiFi, MQTT)
+│── 📄 README.md  (Documentation)
+```
+
+
+
+
+
+
+
 
 
