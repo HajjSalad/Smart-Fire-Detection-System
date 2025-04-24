@@ -18,9 +18,9 @@ An IoT-enabled fire safety solution featuring:
 
 ✅ **Multi-Sensor Monitoring (Sensor Node STM32)**  
 &nbsp;&nbsp;&nbsp;The sensor node has 3 groups of sensors:  
-&nbsp;&nbsp;&nbsp;🔥**Fire Detection**: Temperature, Smoke, Gas, Flame sensors    
-&nbsp;&nbsp;&nbsp;💧**Environmental**: Humidity, VOC sensors  
-&nbsp;&nbsp;&nbsp;♨️**Smart Sensing**: Ambient Light, Thermal IR sensors    
+&nbsp;&nbsp;&nbsp;🔥 **Fire Detection**: Temperature, Smoke, Gas, Flame sensors    
+&nbsp;&nbsp;&nbsp;💧 **Environmental**: Humidity, VOC sensors  
+&nbsp;&nbsp;&nbsp;♨️ **Smart Sensing**: Ambient Light, Thermal IR sensors    
 &nbsp;&nbsp;&nbsp;*(Supports up to 8 sensors per node with configurable thresholds)*   
 
 ✅ **Fire Alarm Control Panel Node (ESP32)**  
