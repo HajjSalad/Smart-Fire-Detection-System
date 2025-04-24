@@ -13,31 +13,49 @@ An IoT-enabled fire safety solution featuring:
 ---
 ### 🔧 Key Features
 ✅ **Modular & Scalable Design**  
-&nbsp;&nbsp;&nbsp;🔹 **Abstract Factory Pattern** in C++ for dynamic sensor management.  
-&nbsp;&nbsp;&nbsp;🔹 **Plug-and-play expandability**: Add more Sensor Nodes to the FACP for larger deployments.  
+&nbsp;&nbsp;&nbsp;• **Abstract Factory Pattern** in C++ for dynamic sensor management.  
+&nbsp;&nbsp;&nbsp;• **Plug-and-play expandability**: Add more Sensor Nodes to the FACP for larger deployments.  
 
-✅ **Multi-Sensor Monitoring (Sensor Node STM32)**   
+✅ **Multi-Sensor Monitoring (Sensor Node STM32)**  
+&nbsp;&nbsp;&nbsp;The sensor node has 3 groups of sensors:
 &nbsp;&nbsp;&nbsp;🔥**Fire Detection**: Temperature, Smoke, Gas, Flame sensors    
 &nbsp;&nbsp;&nbsp;💧**Environmental**: Humidity, VOC sensors  
 &nbsp;&nbsp;&nbsp;♨️**Smart Sensing**: Ambient Light, Thermal IR sensors    
-&nbsp;&nbsp;&nbsp;*(Supports up to 8 sensors per node with configurable thresholds)*  
-
-✅ **Robust Communication Stack**  
-&nbsp;&nbsp;🔹 **SPI**:  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Heartbeat checks (FACP → Node → FACP)  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• On-demand sensor data transmission (Node → FACP)     
-&nbsp;&nbsp;🔹 **Hardware Interrupt Line**:  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Low-latency anomaly alerts (Node → FACP)  
-&nbsp;&nbsp;🔹 **UART Debugging**:  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Serial logs for sensor status, diagnostics, and development. 
+&nbsp;&nbsp;&nbsp;*(Supports up to 8 sensors per node with configurable thresholds)*   
 
 ✅ **Fire Alarm Control Panel Node (ESP32)**  
-&nbsp;&nbsp;&nbsp;🔹 **Active Monitoring**: Periodically checks sensor node health via SPI.  
-&nbsp;&nbsp;&nbsp;🔹 **Event-Driven Response**: Instantly reacts to interrupt-based anomaly alerts from sensor nodes.  
-&nbsp;&nbsp;&nbsp;🔹 **Scalable Architecture**: Supports daisy-chaining multiple sensor nodes for large-scale deployments.  
+&nbsp;&nbsp;&nbsp;• **Active Monitoring**: Periodically checks sensor node health via SPI.  
+&nbsp;&nbsp;&nbsp;• **Event-Driven Response**: Instantly reacts to interrupt-based anomaly alerts from sensor nodes.  
+&nbsp;&nbsp;&nbsp;• **Scalable Architecture**: Supports daisy-chaining multiple sensor nodes for large-scale deployments.  
 
 ✅ **Edge Processing**: Anomalies are identified at the sensor node level.   
 ✅ **Cloud Integration**: Lightweight AWS IoT Core messaging for live sensor status and emergency alerts.  
+
+✅ **Robust Communication Stack**  
+&nbsp;&nbsp;🔹 **UART Debugging**:  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Serial logs for sensor status, diagnostics, and development.  
+&nbsp;&nbsp;🔹 **Hardware Interrupt Line**:  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Low-latency Sensor Node to FACP anomaly alerts (Node → FACP)  
+&nbsp;&nbsp;🔹 **SPI**:  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Heartbeat checks (FACP → Node → FACP)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• On-demand sensor data transmission (Node → FACP)
+
+**Two-Phase Command-Response Protocol SPI**  
+&nbsp;&nbsp;➤**Phase 1:**  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Master (ESP32) initiates SPI communication and sends command  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Slave (STM32) receives command responds with dummy  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Sensor Node gets the chance to prepare the response
+&nbsp;&nbsp;➤**Phase 2:**  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Master sends dummy   
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Slave responds with the actual response
+```
+|            Master                          |             Slave                              |
+|    Phase 1 Command Sent: Are you alive?    |    Phase 1 Command received: Are you alive?    |
+|    Phase 1 DUMMY received: FF FF FF FF     |    Phase 1 DUMMY sent: FF FF FF FF             |
+|                                            |                                                |
+|    Phase 2 Command Sent: FF FF FF FF       |    Phase 2 Command received: FF FF FF FF       |
+|    Phase 2 DUMMY received: I'm alive       |    Phase 2 DUMMY sent: I'm alive               |
+```
 
 ---
 ### 🏗 System Architecture
