@@ -39,9 +39,10 @@ An IoT-enabled fire safety solution featuring:
 
 ✅ **Edge Processing**: Anomalies are identified at the sensor node level.   
 ✅ **Cloud Integration**: Lightweight AWS IoT Core messaging for live sensor status and emergency alerts.  
+
 ---
 ### 📡 **Two-Phase Command-Response Protocol SPI**  
-&nbsp;&nbsp;This SPI communication protocol uses a two-phase approach to allow the slave device sufficient time to process incoming commands and prepare a response:
+&nbsp;&nbsp;This SPI communication protocol uses a two-phase approach to allow the slave device sufficient time to process incoming commands and prepare a response:  
 &nbsp;&nbsp;🔁 **Phase 1: Command Transmission**  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• **Master (ESP32)** initiates communication by sending a command.    
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• **Slave (STM32)** receives the command and replies with dummy bytes.   
