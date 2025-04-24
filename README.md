@@ -40,8 +40,29 @@ An IoT-enabled fire safety solution featuring:
 ✅ **Edge Processing**: Anomalies are identified at the sensor node level.   
 ✅ **Cloud Integration**: Lightweight AWS IoT Core messaging for live sensor status and emergency alerts.    
 
+
 ---
-### 📡 **Two-Phase Command-Response Protocol SPI**  
+### 🧱 **Modular & Scalable Sensor Creation with Abstract Factory Pattern**
+To support scalable deployments and dynamic sensor configuration, we use the Abstract Factory Pattern in C++. This allows the system to flexibly create related groups of sensors without hardcoding specific sensor types into the logic.
+
+🧩 **Factory Structure**
+                        ┌────────────────────┐  
+                        │  SensorFactory     │ → Abstract base class  
+                        └────────────────────┘  
+                         ▲        ▲        ▲  
+       ┌─────────────────┘        │        └─────────────────┐  
+       ▼                          ▼                          ▼  
+┌─────────────────┐       ┌────────────────────┐       ┌──────────────────┐  
+ FireSensorFactory         EnvironSensorFactory         SmartSensorFactory   
+└─────────────────┘       └────────────────────┘       └──────────────────┘  
+  
+Each concrete factory creates a specific family of sensors:  
+🔥 FireSensorFactory → Temp, Smoke, Gas, Flame Sensors  
+🌿 EnvironSensorFactory → Humidity, VOC Sensors  
+💡 SmartSensorFactory → Ambient Light, Thermal IR Sensors  
+
+---
+### 📡 **Two-Phase SPI Command-Response Protocol**  
 This SPI communication protocol uses a two-phase approach to allow the slave device sufficient time to process incoming commands and prepare a response:  
 &nbsp;&nbsp;🔁 **Phase 1: Command Transmission**  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• **Master (ESP32)** initiates communication by sending a command.    
