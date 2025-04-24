@@ -46,6 +46,7 @@ An IoT-enabled fire safety solution featuring:
 To support scalable deployments and dynamic sensor configuration, we use the Abstract Factory Pattern in C++. This allows the system to flexibly create related groups of sensors without hardcoding specific sensor types into the logic.
 
 🧩 **Factory Structure**
+```
                         ┌────────────────────┐  
                         │  SensorFactory     │ → Abstract base class  
                         └────────────────────┘  
@@ -54,8 +55,8 @@ To support scalable deployments and dynamic sensor configuration, we use the Abs
        ▼                          ▼                          ▼  
 ┌─────────────────┐       ┌────────────────────┐       ┌──────────────────┐  
  FireSensorFactory         EnvironSensorFactory         SmartSensorFactory   
-└─────────────────┘       └────────────────────┘       └──────────────────┘  
-  
+└─────────────────┘       └────────────────────┘       └──────────────────┘
+```
 Each concrete factory creates a specific family of sensors:  
 🔥 FireSensorFactory → Temp, Smoke, Gas, Flame Sensors  
 🌿 EnvironSensorFactory → Humidity, VOC Sensors  
