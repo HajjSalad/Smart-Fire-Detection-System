@@ -42,7 +42,7 @@ An IoT-enabled fire safety solution featuring:
 
 ---
 ### 📡 **Two-Phase Command-Response Protocol SPI**  
-&nbsp;&nbsp;This SPI communication protocol uses a two-phase approach to allow the slave device sufficient time to process incoming commands and prepare a response:  
+This SPI communication protocol uses a two-phase approach to allow the slave device sufficient time to process incoming commands and prepare a response:  
 &nbsp;&nbsp;🔁 **Phase 1: Command Transmission**  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• **Master (ESP32)** initiates communication by sending a command.    
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• **Slave (STM32)** receives the command and replies with dummy bytes.   
@@ -79,15 +79,17 @@ Upon detecting an anomaly, the master requests the latest sensor readings from t
 ```
 ### 🛠️ Tools and Software
 𐂷 **Sensor Node**  
-&nbsp;&nbsp;&nbsp;⎔ **VS Code** - Code editor for STM32 firmware development       
-&nbsp;&nbsp;&nbsp;⎔ OpenOCD - Flashing and debugging via SWD     
-&nbsp;&nbsp;&nbsp;⎔ Makefile - Builds and links embedded C code  
+&nbsp;&nbsp;&nbsp;⎔ **VS Code** - Primary code editor for STM32 firmware development      
+&nbsp;&nbsp;&nbsp;⎔ **OpenOCD** - Used for flashing and debugging over SWD     
+&nbsp;&nbsp;&nbsp;⎔ **Makefile** - Handles compilation, linking, and build automation   
 
 🌐 **FACP / Cloud Gateway**   
-&nbsp;&nbsp;&nbsp;⎔ ESP-IDF - Framework for ESP32 development   
-&nbsp;&nbsp;&nbsp;⎔ VS Code - Development and debugging for the gateway   
-&nbsp;&nbsp;&nbsp;⎔ Terraform - Automates AWS infrastructure setup    
-&nbsp;&nbsp;&nbsp;⎔ AWS Cloud - Hosts IoT Core, Timestream, and monitoring services  
+&nbsp;&nbsp;&nbsp;⎔ **ESP-IDF** - Official development framework for ESP32 firmware  
+&nbsp;&nbsp;&nbsp;⎔ **VS Code** - Development environment with ESP-IDF integration and UART debugging   
+&nbsp;&nbsp;&nbsp;⎔ **Terraform** - Automates the provisioning and configuration of AWS infrastructure    
+&nbsp;&nbsp;&nbsp;⎔ **AWS Cloud** - Powers the IoT backend with services like:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• AWS IoT Core – Secure device connectivity and MQTT messaging
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Amazon Timestream – Time-series database for storing sensor data
 
 ### **Hardware Connections**
 | **STM32 PIN** | **Interface**  | **ESP32 Pin** |
