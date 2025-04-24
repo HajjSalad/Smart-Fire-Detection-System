@@ -28,9 +28,6 @@ An IoT-enabled fire safety solution featuring:
 &nbsp;&nbsp;&nbsp;• **Event-Driven Response**: Instantly reacts to interrupt-based anomaly alerts from sensor nodes.  
 &nbsp;&nbsp;&nbsp;• **Scalable Architecture**: Supports daisy-chaining multiple sensor nodes for large-scale deployments.  
 
-✅ **Edge Processing**: Anomalies are identified at the sensor node level.   
-✅ **Cloud Integration**: Lightweight AWS IoT Core messaging for live sensor status and emergency alerts.  
-
 ✅ **Robust Communication Stack**  
 &nbsp;&nbsp;🔹 **UART Debugging**:  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Serial logs for sensor status, diagnostics, and development.  
@@ -40,23 +37,40 @@ An IoT-enabled fire safety solution featuring:
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Heartbeat checks (FACP → Node → FACP)  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• On-demand sensor data transmission (Node → FACP)
 
-**Two-Phase Command-Response Protocol SPI**  
-&nbsp;&nbsp;➤ **Phase 1:**  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Master (ESP32) initiates SPI communication and sends command  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Slave (STM32) receives command, responds with dummy  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Sensor Node gets the chance to prepare the response  
-&nbsp;&nbsp;➤**Phase 2:**  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Master sends dummy   
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Slave responds with the actual response
+✅ **Edge Processing**: Anomalies are identified at the sensor node level.   
+✅ **Cloud Integration**: Lightweight AWS IoT Core messaging for live sensor status and emergency alerts.  
+---
+### 📡 **Two-Phase Command-Response Protocol SPI**  
+&nbsp;&nbsp;This SPI communication protocol uses a two-phase approach to allow the slave device sufficient time to process incoming commands and prepare a response:
+&nbsp;&nbsp;🔁 **Phase 1: Command Transmission**  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• **Master (ESP32)** initiates communication by sending a command.    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• **Slave (STM32)** receives the command and replies with dummy bytes.   
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• The slave parses the command and prepares the appropriate response for the next phase.   
+&nbsp;&nbsp;📤 **Phase 2: Response Retrieval**  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• **Master** sends dummy bytes to generate clock cycles for the SPI bus.     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• **Slave** transmits the prepared response over SPI in real time.  
+
+&nbsp;&nbsp;✅ **Health Status Check** – *"Are you alive?"*  
+&nbsp;&nbsp;This is a basic handshake to check if the slave is responsive.
 ```
 |           Master                          |            Slave                              |
-|   Phase 1 Command Sent: Are you alive?    |   Phase 1 Command received: Are you alive?    |
+|   Phase 1 Command Sent: "Are you alive?"  |   Phase 1 Command received: "Are you alive?"  |
 |   Phase 1 DUMMY received: FF FF FF FF     |   Phase 1 DUMMY sent: FF FF FF FF             |
 |                                           |                                               |
 |   Phase 2 Command Sent: FF FF FF FF       |   Phase 2 Command received: FF FF FF FF       |
-|   Phase 2 DUMMY received: I'm alive       |   Phase 2 DUMMY sent: I'm alive               |
+|   Phase 2 DUMMY received: "I'm alive"     |   Phase 2 DUMMY sent: "I'm alive"             |
 ```
 
+📊 **Sensor Data Request** – *Triggered on Anomaly Detection*  
+Upon detecting an anomaly, the master requests the latest sensor readings from the slave.
+```
+|           Master                          |            Slave                              |
+|  Phase 1 Command Sent: "Data Request"     |   Phase 1 Command received: "Data Request"    |
+|  Phase 1 DUMMY received: FF FF FF FF      |   Phase 1 DUMMY sent: FF FF FF FF             |
+|                                           |                                               |
+|  Phase 2 Command Sent: FF FF FF FF        |   Phase 2 Command received: FF FF FF FF       |
+|  Phase 2 DUMMY received: "1.1, 2.2,..."   |   Phase 2 DUMMY sent: "1.1, 2.2, 3.3..."      |
+```
 ---
 ### 🏗 System Architecture
 ```
