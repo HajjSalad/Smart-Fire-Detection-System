@@ -38,7 +38,7 @@ An IoT-enabled fire safety solution featuring:
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• On-demand sensor data transmission (Node → FACP)
 
 ✅ **Edge Processing**: Anomalies are identified at the sensor node level.   
-✅ **Cloud Integration**: Lightweight AWS IoT Core messaging for live sensor status and emergency alerts.  
+✅ **Cloud Integration**: Lightweight AWS IoT Core messaging for live sensor status and emergency alerts.    
 
 ---
 ### 📡 **Two-Phase Command-Response Protocol SPI**  
