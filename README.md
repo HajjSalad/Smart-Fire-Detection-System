@@ -17,7 +17,7 @@ An IoT-enabled fire safety solution featuring:
 &nbsp;&nbsp;&nbsp;• **Plug-and-play expandability**: Add more Sensor Nodes to the FACP for larger deployments.  
 
 ✅ **Multi-Sensor Monitoring (Sensor Node STM32)**  
-&nbsp;&nbsp;&nbsp;The sensor node has 3 groups of sensors:
+&nbsp;&nbsp;&nbsp;The sensor node has 3 groups of sensors:  
 &nbsp;&nbsp;&nbsp;🔥**Fire Detection**: Temperature, Smoke, Gas, Flame sensors    
 &nbsp;&nbsp;&nbsp;💧**Environmental**: Humidity, VOC sensors  
 &nbsp;&nbsp;&nbsp;♨️**Smart Sensing**: Ambient Light, Thermal IR sensors    
@@ -41,20 +41,20 @@ An IoT-enabled fire safety solution featuring:
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• On-demand sensor data transmission (Node → FACP)
 
 **Two-Phase Command-Response Protocol SPI**  
-&nbsp;&nbsp;➤**Phase 1:**  
+&nbsp;&nbsp;➤ **Phase 1:**  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Master (ESP32) initiates SPI communication and sends command  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Slave (STM32) receives command responds with dummy  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Sensor Node gets the chance to prepare the response
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Slave (STM32) receives command, responds with dummy  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Sensor Node gets the chance to prepare the response  
 &nbsp;&nbsp;➤**Phase 2:**  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Master sends dummy   
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Slave responds with the actual response
 ```
-|            Master                          |             Slave                              |
-|    Phase 1 Command Sent: Are you alive?    |    Phase 1 Command received: Are you alive?    |
-|    Phase 1 DUMMY received: FF FF FF FF     |    Phase 1 DUMMY sent: FF FF FF FF             |
-|                                            |                                                |
-|    Phase 2 Command Sent: FF FF FF FF       |    Phase 2 Command received: FF FF FF FF       |
-|    Phase 2 DUMMY received: I'm alive       |    Phase 2 DUMMY sent: I'm alive               |
+|           Master                          |            Slave                              |
+|   Phase 1 Command Sent: Are you alive?    |   Phase 1 Command received: Are you alive?    |
+|   Phase 1 DUMMY received: FF FF FF FF     |   Phase 1 DUMMY sent: FF FF FF FF             |
+|                                           |                                               |
+|   Phase 2 Command Sent: FF FF FF FF       |   Phase 2 Command received: FF FF FF FF       |
+|   Phase 2 DUMMY received: I'm alive       |   Phase 2 DUMMY sent: I'm alive               |
 ```
 
 ---
