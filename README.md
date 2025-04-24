@@ -48,7 +48,7 @@ To support scalable deployments and dynamic sensor configuration, we use the Abs
 🧩 **Factory Structure**
 ```
                         ┌────────────────────┐  
-                        │  SensorFactory     │ → Abstract base class  
+                        │    SensorFactory   │ → Abstract base class  
                         └────────────────────┘  
                          ▲        ▲        ▲  
        ┌─────────────────┘        │        └─────────────────┐  
