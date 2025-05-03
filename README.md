@@ -107,8 +107,7 @@ Upon detecting an anomaly, the master requests the latest sensor readings from t
 
 🌐 **FACP / Cloud Gateway**     
 &nbsp;&nbsp;&nbsp;⎔ **ESP-IDF** - Official development framework for ESP32 firmware    
-&nbsp;&nbsp;&nbsp;⎔ **VS Code** - Development environment with ESP-IDF integration and UART debugging     
-&nbsp;&nbsp;&nbsp;⎔ **Terraform** - Automates the provisioning and configuration of AWS infrastructure      
+&nbsp;&nbsp;&nbsp;⎔ **VS Code** - Development environment with ESP-IDF integration and UART debugging           
 &nbsp;&nbsp;&nbsp;⎔ **AWS Cloud** - Powers the IoT backend with services like:  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• AWS IoT Core – Secure device connectivity and MQTT messaging   
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Amazon Timestream – Time-series database for storing sensor data  
