@@ -138,7 +138,7 @@ Upon detecting an anomaly, the master requests the latest sensor readings from t
 │   ├── 📄 Makefile             (Build system configuration)
 │── 📁 esp32_facp_cloud_node/
 │   ├── 📄 main.c               (Entry point of the program, Tasks)
-│   ├── 📄 spi.c / .h           (SPI & GPIO Interrupt Communication )
+│   ├── 📄 spi.c / .h           (SPI & GPIO Interrupt Communication)
 │   ├── 📄 uart.c / .h          (UART Communication)
 │   ├── 📄 wifi.c / .h          (WiFi Connectivity)
 │   ├── 📄 cloud.c / .h         (MQTT for AWS Connectivity)
