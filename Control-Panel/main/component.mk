@@ -1,0 +1,3 @@
+COMPOUND_EMBED_TXTFILES := device_cert.pem
+COMPOUND_EMBED_TXTFILES := private_key.pem
+COMPOUND_EMBED_TXTFILES := root_ca.pem

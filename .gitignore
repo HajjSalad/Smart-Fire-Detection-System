@@ -6,8 +6,8 @@
 *.elf
 
 # Ignore build directories
-/Central-Panel/build/
-/Central-Panel/sdkconfig
+/Control-Panel/build/
+/Control-Panel/sdkconfig
 /Sensor-Node/build
 /Debug/
 /STM32_Side/Drivers/
