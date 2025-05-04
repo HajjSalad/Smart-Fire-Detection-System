@@ -5,6 +5,8 @@
 
 #include "stm32f446xx.h"
 #include "systick.h"
+#include "spi.h"
+#include <stdbool.h>
 
 #define SYSTICK_LOAD_VAL		16000
 #define CTRL_ENABLE				(1U<<0)
@@ -12,9 +14,12 @@
 #define CTRL_COUNTFLAG			(1U<<16)
 
 volatile uint32_t systickMillis = 0;		// Global variable to store milliseconds
+volatile uint32_t ms_ticks = 0;
+volatile bool anomaly_trigger = false;
 
 void SysTick_Handler(void) {
 	systickMillis++;						// Increment milliseconds counter
+	Systick_Runner();				// Use this to trigger anomaly every 10sec for testing
 }
 
 // Configure SysTick

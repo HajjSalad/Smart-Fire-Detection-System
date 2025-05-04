@@ -9,6 +9,10 @@
 #define SYSTICK_H_
 
 #include "stm32f446xx.h"
+#include <stdbool.h>
+
+extern volatile uint32_t ms_ticks;
+extern volatile bool anomaly_trigger;
 
 void SysTick_Handler(void);
 void systick_init(void);

@@ -50,33 +50,31 @@
 //     GPIOB->ODR &= ~(1 << 6);
 // }
 
-void test_anomaly_trigger(void) {
-    printf("Set interrupt line high\r\n");
-    GPIOB->ODR |= (1<<6);       // Set interrupt line high
-
-    // Wait until ESP32 triggers a SPI read
-    while (!transfer_complete);
-
-    // Reset flag for next round
-    transfer_complete = 0;
-
-    printf("Received from Master: %s\r\n", rx_buffer);
-    float test_data[10] = {1.1f, 2.2f, 3.3f, 4.4f, 5.5f, 6.6f, 7.7f, 8.8f, 9.9f, 10.10f};
-    if (strcmp((char*)rx_buffer, "Data Request") == 0) {
-        __attribute__((aligned(4))) float sensor_data[10] = {1.1f, 2.2f, 3.3f, 4.4f, 5.5f, 6.6f, 7.7f, 8.8f, 9.9f, 10.10f};
-        prepare_spi_response(RESPONSE_BUFFER, test_data, 10, true);
-    } else {
-        prepare_spi_response(RESPONSE_TEXT, "Unknown command", 0, true);
-    }
-
-    //systickDelayMs(50);
-    GPIOB->ODR &= ~(1<<6);      // Set interrupt line low
-    
-    printf("Test completed. Check ESP32 output.\r\n");
-}
+// void test_anomaly_trigger(void) {
+//     printf("Set interrupt line high\r\n");
+//     GPIOB->ODR |= (1<<6);       // Set interrupt line high
+//
+//     // Wait until ESP32 triggers a SPI read
+//     while (!transfer_complete);
+//
+//     // Reset flag for next round
+//     transfer_complete = 0;
+//
+//     printf("Received from Master: %s\r\n", rx_buffer);
+//     if (strcmp((char*)rx_buffer, "Data Request") == 0) {
+//         __attribute__((aligned(4))) float sensor_data[10] = {1.1f, 2.2f, 3.3f, 4.4f, 5.5f, 6.6f, 7.7f, 8.8f, 9.9f, 10.10f};
+//         prepare_spi_response(RESPONSE_BUFFER, sensor_data, 10, true);
+//     } else {
+//         prepare_spi_response(RESPONSE_TEXT, "Unknown command", 0, true);
+//     }
+//
+//     //systickDelayMs(50);
+//     GPIOB->ODR &= ~(1<<6);      // Set interrupt line low
+//    
+//     printf("Test completed. Check ESP32 output.\r\n");
+// }
 
 int main() {
-
     uart2_rxtx_init();
     demo_init();   
     spi1_slave_init();
@@ -92,22 +90,6 @@ int main() {
 
     while(1) 
     {
-        if (transfer_complete) {
-            transfer_complete = 0;
-           
-            printf("Received from Master: %s\r\n", rx_buffer);
-           
-            if (strcmp((char*)rx_buffer, "Are you Alive?") == 0) {
-                prepare_spi_response(RESPONSE_TEXT, "I'm Alive", 0, true);
-            }
-            else if (strcmp((char*)rx_buffer, "Data Request") == 0) {
-                __attribute__((aligned(4))) float sensor_data[10] = {1.1f, 2.2f, 3.3f, 4.4f, 5.5f, 6.6f, 7.7f, 8.8f, 9.9f, 10.10f};
-                prepare_spi_response(RESPONSE_BUFFER, sensor_data, 10, true);
-            }
-            else {
-                prepare_spi_response(RESPONSE_TEXT, "Unknown command", 0, true);
-            }
-        }
         __WFI();
     }
     return 0;
