@@ -1,0 +1,54 @@
+\doxysection{main/wifi.c File Reference}
+\hypertarget{wifi_8c}{}\label{wifi_8c}\index{main/wifi.c@{main/wifi.c}}
+
+
+Wi-\/\+Fi initialization and connection for ESP32.  
+
+
+{\ttfamily \#include "{}wifi.\+h"{}}\newline
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$string.\+h$>$}\newline
+{\ttfamily \#include $<$sys/param.\+h$>$}\newline
+{\ttfamily \#include "{}esp\+\_\+eth.\+h"{}}\newline
+{\ttfamily \#include "{}esp\+\_\+log.\+h"{}}\newline
+{\ttfamily \#include "{}esp\+\_\+mac.\+h"{}}\newline
+{\ttfamily \#include "{}esp\+\_\+wifi.\+h"{}}\newline
+{\ttfamily \#include "{}nvs\+\_\+flash.\+h"{}}\newline
+{\ttfamily \#include "{}esp\+\_\+check.\+h"{}}\newline
+{\ttfamily \#include "{}esp\+\_\+netif.\+h"{}}\newline
+{\ttfamily \#include "{}esp\+\_\+event.\+h"{}}\newline
+{\ttfamily \#include "{}sdkconfig.\+h"{}}\newline
+{\ttfamily \#include "{}esp\+\_\+system.\+h"{}}\newline
+{\ttfamily \#include "{}freertos/\+Free\+RTOS.\+h"{}}\newline
+{\ttfamily \#include "{}freertos/task.\+h"{}}\newline
+{\ttfamily \#include "{}freertos/timers.\+h"{}}\newline
+{\ttfamily \#include "{}freertos/event\+\_\+groups.\+h"{}}\newline
+{\ttfamily \#include "{}freertos/queue.\+h"{}}\newline
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{wifi_8c_ad3c41badd6f55002a3899ea257214cff}{wifi\+\_\+connection}} ()
+\begin{DoxyCompactList}\small\item\em Connect to a Wi-\/\+Fi network using station (STA) mode. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Wi-\/\+Fi initialization and connection for ESP32. 
+
+This file handles the initialization, configuration, and connection of the ESP32 device to a Wi-\/\+Fi network in station (STA) mode. 
+
+\label{doc-func-members}
+\Hypertarget{wifi_8c_doc-func-members}
+\doxysubsection{Function Documentation}
+\Hypertarget{wifi_8c_ad3c41badd6f55002a3899ea257214cff}\index{wifi.c@{wifi.c}!wifi\_connection@{wifi\_connection}}
+\index{wifi\_connection@{wifi\_connection}!wifi.c@{wifi.c}}
+\doxysubsubsection{\texorpdfstring{wifi\_connection()}{wifi\_connection()}}
+{\footnotesize\ttfamily \label{wifi_8c_ad3c41badd6f55002a3899ea257214cff} 
+void wifi\+\_\+connection (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Connect to a Wi-\/\+Fi network using station (STA) mode. 
+
+Establish a Wi-\/\+Fi connection using STA mode.
+
+Initializes network interfaces, registers event handlers, configures Wi-\/\+Fi settings, and connects to the Wi-\/\+Fi network using predefined SSID and password. 

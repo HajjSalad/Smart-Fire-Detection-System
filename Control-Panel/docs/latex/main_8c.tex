@@ -1,0 +1,136 @@
+\doxysection{main/main.c File Reference}
+\hypertarget{main_8c}{}\label{main_8c}\index{main/main.c@{main/main.c}}
+
+
+Master node for polling health and requesting sensor data via SPI, and publishing data to AWS MQTT.  
+
+
+{\ttfamily \#include "{}spi.\+h"{}}\newline
+{\ttfamily \#include "{}uart.\+h"{}}\newline
+{\ttfamily \#include "{}wifi.\+h"{}}\newline
+{\ttfamily \#include "{}cloud.\+h"{}}\newline
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$string.\+h$>$}\newline
+{\ttfamily \#include "{}esp\+\_\+log.\+h"{}}\newline
+{\ttfamily \#include "{}sdkconfig.\+h"{}}\newline
+{\ttfamily \#include "{}nvs\+\_\+flash.\+h"{}}\newline
+{\ttfamily \#include "{}driver/gpio.\+h"{}}\newline
+{\ttfamily \#include "{}freertos/task.\+h"{}}\newline
+{\ttfamily \#include "{}gpio\+\_\+interrupt.\+h"{}}\newline
+{\ttfamily \#include "{}freertos/semphr.\+h"{}}\newline
+{\ttfamily \#include "{}driver/spi\+\_\+master.\+h"{}}\newline
+{\ttfamily \#include "{}freertos/\+Free\+RTOS.\+h"{}}\newline
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{main_8c_a400d28e1af2bcd57bf651dc23290a6d3}{MQTT\+\_\+\+TOPIC}}~"{}sensor\+\_\+node\+\_\+1"{}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{main_8c_a0034ce090371242f108d31f2c5bb3cb7}{publish\+\_\+health}} (void)
+\begin{DoxyCompactList}\small\item\em Publishes a health-\/check message ("{}\+Node 1 alive"{}) to AWS MQTT. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_af75d22fb529dff863ab1b3e99ba14e0b}{publish\+\_\+sensor\+\_\+data}} (const uint8\+\_\+t \texorpdfstring{$\ast$}{*}data, size\+\_\+t len)
+\begin{DoxyCompactList}\small\item\em Publishes parsed float sensor datato AWS MQTT. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_a665139c95b237fa0b66bf95609265545}{poll\+\_\+health}} (void)
+\begin{DoxyCompactList}\small\item\em Polls slave device for health status via SPI. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_a73a85660c9125da17903fcc70e55dc85}{request\+\_\+data}} (void)
+\begin{DoxyCompactList}\small\item\em Sends a sensor data request to the slave device via SPI. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_a630544a7f0a2cc40d8a7fefab7e2fe70}{app\+\_\+main}} (void)
+\begin{DoxyCompactList}\small\item\em Entry point of the master node application. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+volatile int \mbox{\hyperlink{main_8c_af6eb8fe838ab55f6f4435358c1d3fe8b}{flag\+Request}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Master node for polling health and requesting sensor data via SPI, and publishing data to AWS MQTT. 
+
+
+
+\label{doc-define-members}
+\Hypertarget{main_8c_doc-define-members}
+\doxysubsection{Macro Definition Documentation}
+\Hypertarget{main_8c_a400d28e1af2bcd57bf651dc23290a6d3}\index{main.c@{main.c}!MQTT\_TOPIC@{MQTT\_TOPIC}}
+\index{MQTT\_TOPIC@{MQTT\_TOPIC}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{MQTT\_TOPIC}{MQTT\_TOPIC}}
+{\footnotesize\ttfamily \label{main_8c_a400d28e1af2bcd57bf651dc23290a6d3} 
+\#define MQTT\+\_\+\+TOPIC~"{}sensor\+\_\+node\+\_\+1"{}}
+
+
+
+\label{doc-func-members}
+\Hypertarget{main_8c_doc-func-members}
+\doxysubsection{Function Documentation}
+\Hypertarget{main_8c_a630544a7f0a2cc40d8a7fefab7e2fe70}\index{main.c@{main.c}!app\_main@{app\_main}}
+\index{app\_main@{app\_main}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{app\_main()}{app\_main()}}
+{\footnotesize\ttfamily \label{main_8c_a630544a7f0a2cc40d8a7fefab7e2fe70} 
+void app\+\_\+main (\begin{DoxyParamCaption}\item[{void}]{}{}\end{DoxyParamCaption})}
+
+
+
+Entry point of the master node application. 
+
+Initializes peripherals, Wi\+Fi, MQTT, then starts the polling task. \Hypertarget{main_8c_a665139c95b237fa0b66bf95609265545}\index{main.c@{main.c}!poll\_health@{poll\_health}}
+\index{poll\_health@{poll\_health}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{poll\_health()}{poll\_health()}}
+{\footnotesize\ttfamily \label{main_8c_a665139c95b237fa0b66bf95609265545} 
+void poll\+\_\+health (\begin{DoxyParamCaption}\item[{void}]{}{}\end{DoxyParamCaption})}
+
+
+
+Polls slave device for health status via SPI. 
+
+\Hypertarget{main_8c_a0034ce090371242f108d31f2c5bb3cb7}\index{main.c@{main.c}!publish\_health@{publish\_health}}
+\index{publish\_health@{publish\_health}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{publish\_health()}{publish\_health()}}
+{\footnotesize\ttfamily \label{main_8c_a0034ce090371242f108d31f2c5bb3cb7} 
+void publish\+\_\+health (\begin{DoxyParamCaption}\item[{void}]{}{}\end{DoxyParamCaption})}
+
+
+
+Publishes a health-\/check message ("{}\+Node 1 alive"{}) to AWS MQTT. 
+
+\Hypertarget{main_8c_af75d22fb529dff863ab1b3e99ba14e0b}\index{main.c@{main.c}!publish\_sensor\_data@{publish\_sensor\_data}}
+\index{publish\_sensor\_data@{publish\_sensor\_data}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{publish\_sensor\_data()}{publish\_sensor\_data()}}
+{\footnotesize\ttfamily \label{main_8c_af75d22fb529dff863ab1b3e99ba14e0b} 
+void publish\+\_\+sensor\+\_\+data (\begin{DoxyParamCaption}\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{data}{, }\item[{size\+\_\+t}]{len}{}\end{DoxyParamCaption})}
+
+
+
+Publishes parsed float sensor datato AWS MQTT. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em data} & Pointer to raw byte buffer containing float values. \\
+\hline
+{\em len} & Length of the byte buffer (40 bytes = 10 floats). \\
+\hline
+\end{DoxyParams}
+\Hypertarget{main_8c_a73a85660c9125da17903fcc70e55dc85}\index{main.c@{main.c}!request\_data@{request\_data}}
+\index{request\_data@{request\_data}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{request\_data()}{request\_data()}}
+{\footnotesize\ttfamily \label{main_8c_a73a85660c9125da17903fcc70e55dc85} 
+void request\+\_\+data (\begin{DoxyParamCaption}\item[{void}]{}{}\end{DoxyParamCaption})}
+
+
+
+Sends a sensor data request to the slave device via SPI. 
+
+
+
+\label{doc-var-members}
+\Hypertarget{main_8c_doc-var-members}
+\doxysubsection{Variable Documentation}
+\Hypertarget{main_8c_af6eb8fe838ab55f6f4435358c1d3fe8b}\index{main.c@{main.c}!flagRequest@{flagRequest}}
+\index{flagRequest@{flagRequest}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{flagRequest}{flagRequest}}
+{\footnotesize\ttfamily \label{main_8c_af6eb8fe838ab55f6f4435358c1d3fe8b} 
+volatile int flag\+Request\hspace{0.3cm}{\ttfamily [extern]}}
+
+Flag indicating an interrupt request 

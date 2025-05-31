@@ -1,0 +1,86 @@
+\doxysection{main/spi.h File Reference}
+\hypertarget{spi_8h}{}\label{spi_8h}\index{main/spi.h@{main/spi.h}}
+
+
+Interface for SPI Master initialization on ESP32 using ESP-\/\+IDF.  
+
+
+{\ttfamily \#include "{}freertos/\+Free\+RTOS.\+h"{}}\newline
+{\ttfamily \#include "{}freertos/task.\+h"{}}\newline
+{\ttfamily \#include "{}freertos/semphr.\+h"{}}\newline
+{\ttfamily \#include "{}driver/spi\+\_\+master.\+h"{}}\newline
+{\ttfamily \#include "{}driver/gpio.\+h"{}}\newline
+{\ttfamily \#include "{}sdkconfig.\+h"{}}\newline
+{\ttfamily \#include "{}esp\+\_\+log.\+h"{}}\newline
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{spi_8h_a5db0aceecaf7db5fbe2984e88fef3734}{spi\+\_\+init}} ()
+\begin{DoxyCompactList}\small\item\em Initialize the SPI bus and attach the SPI device. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+spi\+\_\+device\+\_\+handle\+\_\+t \mbox{\hyperlink{spi_8h_ae280e9f4670c46b616127091ed042b7c}{handle}}
+\begin{DoxyCompactList}\small\item\em Handle to the SPI device, initialized by \doxylink{spi_8h_a5db0aceecaf7db5fbe2984e88fef3734}{spi\+\_\+init()} \end{DoxyCompactList}\item 
+Task\+Handle\+\_\+t \mbox{\hyperlink{spi_8h_aea550bf013f137f3f7657fc77b1535f6}{spi\+\_\+task\+\_\+handle}}
+\begin{DoxyCompactList}\small\item\em Handle to the SPI task, initialized in x\+Task\+Create() \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Interface for SPI Master initialization on ESP32 using ESP-\/\+IDF. 
+
+This header file declares the SPI initialization function and external handles required to manage SPI communication. 
+
+\label{doc-func-members}
+\Hypertarget{spi_8h_doc-func-members}
+\doxysubsection{Function Documentation}
+\Hypertarget{spi_8h_a5db0aceecaf7db5fbe2984e88fef3734}\index{spi.h@{spi.h}!spi\_init@{spi\_init}}
+\index{spi\_init@{spi\_init}!spi.h@{spi.h}}
+\doxysubsubsection{\texorpdfstring{spi\_init()}{spi\_init()}}
+{\footnotesize\ttfamily \label{spi_8h_a5db0aceecaf7db5fbe2984e88fef3734} 
+void spi\+\_\+init (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Initialize the SPI bus and attach the SPI device. 
+
+This function must be called before any SPI transactions are performed. It sets up the SPI bus and adds the SPI device to the bus with the specified configuration.
+
+Initialize the SPI bus and attach the SPI device.
+
+This function sets up thew SPI bus with specified parameters and add the SPI device to the bus using the ESP-\/\+IDF SPI Master driver.
+
+
+\begin{DoxyItemize}
+\item Clock speed\+: 100 k\+Hz
+\item Mode\+: SPI Mode 0 (CPOL = 0, CPHA = 0)
+\item SS pin\+: GPIO 5
+\item Max transfer size\+: 64 bytes 
+\end{DoxyItemize}
+
+\label{doc-var-members}
+\Hypertarget{spi_8h_doc-var-members}
+\doxysubsection{Variable Documentation}
+\Hypertarget{spi_8h_ae280e9f4670c46b616127091ed042b7c}\index{spi.h@{spi.h}!handle@{handle}}
+\index{handle@{handle}!spi.h@{spi.h}}
+\doxysubsubsection{\texorpdfstring{handle}{handle}}
+{\footnotesize\ttfamily \label{spi_8h_ae280e9f4670c46b616127091ed042b7c} 
+spi\+\_\+device\+\_\+handle\+\_\+t handle\hspace{0.3cm}{\ttfamily [extern]}}
+
+
+
+Handle to the SPI device, initialized by \doxylink{spi_8h_a5db0aceecaf7db5fbe2984e88fef3734}{spi\+\_\+init()} 
+
+Handle to the SPI device, initialized by \doxylink{spi_8h_a5db0aceecaf7db5fbe2984e88fef3734}{spi\+\_\+init()} \Hypertarget{spi_8h_aea550bf013f137f3f7657fc77b1535f6}\index{spi.h@{spi.h}!spi\_task\_handle@{spi\_task\_handle}}
+\index{spi\_task\_handle@{spi\_task\_handle}!spi.h@{spi.h}}
+\doxysubsubsection{\texorpdfstring{spi\_task\_handle}{spi\_task\_handle}}
+{\footnotesize\ttfamily \label{spi_8h_aea550bf013f137f3f7657fc77b1535f6} 
+Task\+Handle\+\_\+t spi\+\_\+task\+\_\+handle\hspace{0.3cm}{\ttfamily [extern]}}
+
+
+
+Handle to the SPI task, initialized in x\+Task\+Create() 
+
+Handle to the SPI task, initialized in x\+Task\+Create()
+
+Handle of the task to notify on interrupt 
