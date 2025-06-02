@@ -1,3 +1,11 @@
+/**
+ * @file uart.c
+ * @brief UART communication setup and I/O functions for STM32F446xx.
+ *
+ * This file contains functions to initialize UART2 for full-duplex communication
+ * and perform basic transmit/receive operations. It includes GPIO pin
+ * configuration and baud rate setting.
+ */
 
 #include "stm32f446xx.h"
 #include "uart.h"
@@ -18,14 +26,19 @@
 
 #define UART_BAUDRATE		115200
 
-
 static void uart_set_baudrate(USART_TypeDef *USARTx, uint32_t PeriphClk, uint32_t BaudRate);
 static uint16_t compute_uart_bd(uint32_t PeriphClk, uint32_t BaudRate);
 
-// int __io_putchar(int ch) {
-//     uart2_write(ch);
-//     return ch;
-// }
+/**
+ * @brief System write override for low-level output via UART2.
+ *
+ * Used by `printf` internally to send output through UART2.
+ *
+ * @param file File descriptor (unused)
+ * @param ptr Pointer to data buffer
+ * @param len Number of characters to write
+ * @return int Number of characters written
+ */
 int _write(int file, char *ptr, int len) {
     for (int i = 0; i < len; i++) {
         uart2_write(ptr[i]);
@@ -33,7 +46,13 @@ int _write(int file, char *ptr, int len) {
     return len;
 }
 
-// Initialize both the uart receiver and transmitter
+/**
+ * @brief Initialize UART2 with both transmitter and receiver enabled.
+ *
+ * Configures GPIOA pins PA2 and PA3 for UART alternate function,
+ * sets the baud rate, enables UART2 peripheral clock, and enables
+ * the UART module for transmission and reception.
+ */
 void uart2_rxtx_init(void) {
 
     /******   Configure UART GPIO Pin    ******/
@@ -77,6 +96,14 @@ void uart2_rxtx_init(void) {
     USART2->CR1 |= CR1_UE;		// Doesn't clear CR1, but adds new value to existing values
 }
 
+/**
+ * @brief Read a character from UART2.
+ *
+ * Waits until the receive data register is not empty,
+ * then returns the received character.
+ *
+ * @return char Received character
+ */
 char uart2_read(void) {
 
     // Make sure the receive data register is not empty. Status register (USART_SR) for RXNE=5 (RM pg547)
@@ -86,6 +113,14 @@ char uart2_read(void) {
     return USART2->DR;
 }
 
+/**
+ * @brief Write a character to UART2.
+ *
+ * Waits until the transmit data register is empty,
+ * then writes the character to the UART data register.
+ *
+ * @param ch Character to be transmitted
+ */
 void uart2_write(int ch) {
 
     // Make sure the transmit data register is empty. Status register (USART_SR) for TXE=7 (RM pg547)
@@ -95,11 +130,29 @@ void uart2_write(int ch) {
     USART2->DR = (ch & 0xFF);
 }
 
+/**
+ * @brief Set the baud rate for a USART peripheral.
+ *
+ * Computes and writes the baud rate register (BRR) value.
+ *
+ * @param USARTx Pointer to USART peripheral
+ * @param PeriphClk Peripheral clock frequency
+ * @param BaudRate Desired baud rate
+ */
 static void uart_set_baudrate(USART_TypeDef *USARTx, uint32_t PeriphClk, uint32_t BaudRate) {
 
     USARTx->BRR = compute_uart_bd(PeriphClk, BaudRate);
 }
 
+/**
+ * @brief Compute the baud rate divisor.
+ *
+ * Used internally to compute the BRR value from the clock frequency and desired baud rate.
+ *
+ * @param PeriphClk Peripheral clock frequency
+ * @param BaudRate Desired baud rate
+ * @return uint16_t Computed BRR value
+ */
 static uint16_t compute_uart_bd(uint32_t PeriphClk, uint32_t BaudRate) {
 
     return ((PeriphClk + (BaudRate/2U))/BaudRate);

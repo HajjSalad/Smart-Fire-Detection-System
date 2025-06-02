@@ -38,21 +38,7 @@ volatile uint16_t tx_index = 0;
 
 volatile SPI_Response response_queue[RESPONSE_QUEUE_SIZE];
 
-// Send an inteerupt every 20 sec - Pretend an anomaly was detected
-void Systick_Runner(void) {
-    ms_ticks++;
-    
-    if (ms_ticks >= 20000) {        // Every 20sec
-        printf("\nSet interrupt line high\r\n");
-        GPIOB->ODR |= (1<<6);       // Set interrupt line high
-    
-        // systickDelayMs(50);
-        GPIOB->ODR &= ~(1<<6);      // Set interrupt line low 
-        printf("Set interrupt line low\r\n");       
-    
-        ms_ticks = 0;  // Reset timer
-    }
-}
+
 
 void queue_response(ResponseType type, const void *data, uint16_t length) {
     response_queue[0].type = type;
@@ -90,6 +76,7 @@ void process_spi_command(void) {
     else if (strncmp((char*)rx_buffer, "Data Request", strlen("Data Request")) == 0) {
         __attribute__((aligned(4))) float sensor_data[10] = {1.1f, 2.2f, 3.3f, 4.4f, 5.5f, 6.6f, 7.7f, 8.8f, 9.9f, 10.10f};
         queue_response(RESPONSE_BUFFER, sensor_data, 10 * sizeof(float));
+
     }
     else {
         queue_response(RESPONSE_TEXT, "Unknown command", strlen("Unknown command"));

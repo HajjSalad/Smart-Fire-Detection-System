@@ -38,7 +38,7 @@ extern volatile SPI_Response response_queue[RESPONSE_QUEUE_SIZE];
 
 // Function prototypes
 
-void Systick_Runner();
+
 void queue_response(ResponseType type, const void *data, uint16_t length);
 void prepare_queued_response(bool clean_rx);
 void process_spi_command(void);

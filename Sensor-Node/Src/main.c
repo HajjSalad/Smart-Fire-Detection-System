@@ -17,33 +17,71 @@
 // 1. Indicate desired # of sensor groups (NUM_GROUPS in simulate.h)
 // 2. Add to create desired sensor group to group[] in main.c->generate_sensors()
 // Done!
-//
-// void generate_sensors() 
-// {
-//     // Create sensor groups
-//     group[0] = create_sensor_group("Fire");
-//     group[1] = create_sensor_group("Environment");
-//     group[2] = create_sensor_group("Smart");
-//    
-//     bool group_creation_failed = false;
-//     for (int i = 0; i < NUM_GROUPS; i++) {
-//         if (!group[i]) {
-//             group_creation_failed = true;
-//             break;
-//         }
-//     }
-//     if (group_creation_failed) {
-//         printf("Failed to create sensor group\r\n");
-//         return;
-//     }
-//
-//     // Get the number of sensors for each group
-//     for (int j = 0; j < NUM_GROUPS; j++){
-//         groupSensorCount[j] = get_sensor_count(group[j]);
-//         printf("Sensors for group[%d]: %d sensors\r\n", j, groupSensorCount[j]);
-//     }
-// }
-//
+
+void generate_sensors() 
+{
+    // Create sensor groups
+    group[0] = create_sensor_group("Fire");
+    group[1] = create_sensor_group("Environment");
+    group[2] = create_sensor_group("Smart");
+   
+    bool group_creation_failed = false;
+    for (int i = 0; i < NUM_GROUPS; i++) {
+        if (!group[i]) {
+            group_creation_failed = true;
+            break;
+        }
+    }
+    if (group_creation_failed) {
+        printf("Failed to create sensor group\r\n");
+        return;
+    }
+
+    // Check the number of sensors for each group
+    for (int j = 0; j < NUM_GROUPS; j++){
+        groupSensorCount[j] = get_sensor_count(group[j]);
+        printf("Sensors for group[%d]: %d sensors\r\n", j, groupSensorCount[j]);
+    }
+}
+
+int main() {
+    uart2_rxtx_init();
+    demo_init();   
+    spi1_slave_init();
+    interrupt_line_init();
+    systick_init();
+
+    printf("\nSTM32 Sensor Node Start\r\n");                                    
+    printf("Demo Message: %s\r\n", demo_get_message());    // Make sure C++ is working
+    printf("\nTesting\r\n");
+
+    srand(time(NULL));
+    generate_sensors();
+    process_sensor_values();
+
+    while(1) 
+    {
+        __WFI();
+    }
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // void trigger_anomaly_interrupt(void) {
 //     GPIOB->ODR |= (1 << 6);
 //     for (volatile int d = 0; d < 1000; d++);
@@ -73,24 +111,3 @@
 //    
 //     printf("Test completed. Check ESP32 output.\r\n");
 // }
-
-int main() {
-    uart2_rxtx_init();
-    demo_init();   
-    spi1_slave_init();
-    interrupt_line_init();
-    systick_init();
-
-    printf("\nFire Detection Sensor Node Start\r\n");                                    
-    printf("Demo Message: %s\r\n", demo_get_message());    // Make sure C++ is working
-
-    srand(time(NULL));
-    //generate_sensors();
-    //process_sensor_values();
-
-    while(1) 
-    {
-        __WFI();
-    }
-    return 0;
-}

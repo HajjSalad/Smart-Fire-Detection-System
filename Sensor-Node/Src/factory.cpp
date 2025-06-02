@@ -1,48 +1,48 @@
 
-// #include "factory.h"
-// #include "sensor.h"
+#include "factory.h"
+#include "sensor.h"
 
-// #include <string>
-// #include <stdio.h>
+#include <string>
+#include <stdio.h>
 
-// #include <memory>
-// #include <string>
-// #include <vector>
+#include <memory>
+#include <string>
+#include <vector>
 
-// // Concrete Factory for Fire Detection Sensors
-// std::unique_ptr<Sensor> FireSensorFactory::createTempSensor() {
-//     return std::make_unique<TempSensor>();
-// }
+// Concrete Factory for Fire Detection Sensors
+std::unique_ptr<Sensor> FireSensorFactory::createTempSensor() {
+    return std::make_unique<TempSensor>();
+}
 
-// std::unique_ptr<Sensor> FireSensorFactory::createSmokeSensor() {
-//     return std::make_unique<SmokeSensor>();
-// }
+std::unique_ptr<Sensor> FireSensorFactory::createSmokeSensor() {
+    return std::make_unique<SmokeSensor>();
+}
 
-// std::unique_ptr<Sensor> FireSensorFactory::createGasSensor() {
-//     return std::make_unique<GasSensor>();
-// }
+std::unique_ptr<Sensor> FireSensorFactory::createGasSensor() {
+    return std::make_unique<GasSensor>();
+}
 
-// std::unique_ptr<Sensor> FireSensorFactory::createFlameSensor() {
-//     return std::make_unique<FlameSensor>();
-// }
+std::unique_ptr<Sensor> FireSensorFactory::createFlameSensor() {
+    return std::make_unique<FlameSensor>();
+}
 
-// // Concrete Factory for Environment Sensors
-// std::unique_ptr<Sensor> EnvironSensorFactory::createHumiditySensor() {
-//     return std::make_unique<HumiditySensor>();
-// }
+// Concrete Factory for Environment Sensors
+std::unique_ptr<Sensor> EnvironSensorFactory::createHumiditySensor() {
+    return std::make_unique<HumiditySensor>();
+}
 
-// std::unique_ptr<Sensor> EnvironSensorFactory::createVOCSensor() {
-//     return std::make_unique<VOCSensor>();
-// }
+std::unique_ptr<Sensor> EnvironSensorFactory::createVOCSensor() {
+    return std::make_unique<VOCSensor>();
+}
 
-// // Concrete Factory for Smart Features Sensors
-// std::unique_ptr<Sensor> SmartSensorFactory::createAmbientLSensor() {
-//     return std::make_unique<AmbientLightSensor>();
-// }
+// Concrete Factory for Smart Features Sensors
+std::unique_ptr<Sensor> SmartSensorFactory::createAmbientLSensor() {
+    return std::make_unique<AmbientLightSensor>();
+}
 
-// std::unique_ptr<Sensor> SmartSensorFactory::createThermalISensor() {
-//     return std::make_unique<ThermalIRSensor>();
-// }
+std::unique_ptr<Sensor> SmartSensorFactory::createThermalISensor() {
+    return std::make_unique<ThermalIRSensor>();
+}
 
 
 
