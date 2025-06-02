@@ -1,18 +1,36 @@
-// #ifndef SPI_H
-// #define SPI_H
+/**
+ * @file spi.h
+ * @brief Interface for SPI Master initialization on ESP32 using ESP-IDF.
+ * 
+ * This header file declares the SPI initialization function and external 
+ * handles required to manage SPI communication.
+ */
 
-// #include "freertos/FreeRTOS.h"
-// #include "freertos/task.h"
-// #include "freertos/semphr.h"
+#ifndef SPI_H
+#define SPI_H
 
-// #include "driver/spi_master.h"
-// #include "driver/gpio.h"
-// #include "sdkconfig.h"
-// #include "esp_log.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/semphr.h"
 
-// extern spi_device_handle_t handle;
-// extern TaskHandle_t spi_task_handle;
+#include "driver/spi_master.h"
+#include "driver/gpio.h"
+#include "sdkconfig.h"
+#include "esp_log.h"
 
-// void spi_init();
+/// Handle to the SPI device, initialized by spi_init()
+extern spi_device_handle_t handle;
 
-// #endif // SPI_H
+/// Handle to the SPI task, initialized in xTaskCreate()
+extern TaskHandle_t spi_task_handle;
+
+/**
+ * @brief Initialize the SPI bus and attach the SPI device
+ * 
+ * This function must be called before any SPI transactions are performed.
+ * It sets up the SPI bus and adds the SPI device to the bus with the
+ * specified configuration.
+ */
+void spi_init();
+
+#endif // SPI_H

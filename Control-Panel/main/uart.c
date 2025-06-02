@@ -1,3 +1,10 @@
+/**
+ * @file uart.c
+ * @brief UART initialization for ESP32 using ESP-IDF.
+ *
+ * This source file configures and initializes UART0 for serial communication.
+ * It sets baud rate, pins, and buffer sizes for RX and TX.
+ */
 
 #include "soc/uart_struct.h"
 #include "driver/uart.h"
@@ -5,14 +12,19 @@
 #include "sdkconfig.h"
 #include "esp_log.h"
 
-#define UART_0_TX              1       // TX pin
-#define UART_0_RX              3       // RX pin
-#define RX_BUF_SIZE            256
-#define TX_BUF_SIZE            256
-#define UART_BAUD_RATE         115200
-#define UART_TASK_STACK_SIZE   3072
+#define UART_0_TX              1       ///< UART TX pin number
+#define UART_0_RX              3       ///< UART RX pin number
+#define RX_BUF_SIZE            256     ///< UART RX buffer size
+#define TX_BUF_SIZE            256     ///< UART TX buffer size
+#define UART_BAUD_RATE         115200  ///< UART communication baud rate
 
-// Initialize UART
+/**
+ * @brief Initialize UART0 with default configuration.
+ *
+ * This function configures UART0 with 8 data bits, 1 stop bit, no parity, 
+ * no flow control, and a baud rate of 115200. It also sets the TX and RX pins,
+ * installs the UART driver, and allocates RX and TX buffers.
+ */
 void uart_init(void) {
     // Configure UART Parameters
     uart_config_t uart_config = {

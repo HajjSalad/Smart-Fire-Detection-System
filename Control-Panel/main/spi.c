@@ -1,5 +1,10 @@
-
-//   SPI Master
+/**
+ * @file spi.c
+ * @brief SPI Master initialization for ESP32 using ESP-IDF.
+ * 
+ * This file contains the implementation of initializing the SPI bus
+ * and setting up the SPI device configuration for communication.
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,14 +19,32 @@
 #include "sdkconfig.h"
 #include "esp_log.h"
 
+/// GPIO pin used for Master Out Slave In
 #define MOSI             23
+/// GPIO pin used for Master In Slave Out
 #define MISO             19
+/// GPIO pin used for SPI Clock
 #define SCK              18
+/// GPIO pin used for Slave Select
 #define SS                5
 
+/// Handle to the SPI device
 spi_device_handle_t handle;
+
+/// Handle to the SPI task
 TaskHandle_t spi_task_handle = NULL;
 
+/**
+ * @brief Initialize the SPI bus and configure the SPI device.
+ * 
+ * This function sets up thew SPI bus with specified parameters and
+ * add the SPI device to the bus using the ESP-IDF SPI Master driver.
+ * 
+ * - Clock speed: 100 kHz
+ * - Mode: SPI Mode 0 (CPOL = 0, CPHA = 0)
+ * - SS pin: GPIO 5
+ * - Max transfer size: 64 bytes
+ */
 void spi_init()
 {
     // Set the communication parameters
