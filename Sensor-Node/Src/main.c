@@ -39,8 +39,17 @@ void generate_sensors()
 
     // Check the number of sensors for each group
     for (int j = 0; j < NUM_GROUPS; j++){
-        groupSensorCount[j] = get_sensor_count(group[j]);
-        printf("Sensors for group[%d]: %d sensors\r\n", j, groupSensorCount[j]);
+        int count = get_sensor_count(group[j]);
+        printf("Sensors for group[%d]: %d sensors(", j, count);
+
+        for (int i = 0; i < count; i++) {
+            const char* name = get_sensor_name(group[j], i);
+            printf("%s", name);
+            if (i < count - 1) {
+                printf(", ");
+            }
+        }
+        printf(")\r\n");
     }
 }
 
@@ -53,14 +62,16 @@ int main() {
 
     printf("\nSTM32 Sensor Node Start\r\n");                                    
     printf("Demo Message: %s\r\n", demo_get_message());    // Make sure C++ is working
-    printf("\nTesting\r\n");
+    printf("\nTesting101\r\n");
 
     srand(time(NULL));
     generate_sensors();
-    process_sensor_values();
+    // process_sensor_values();
 
     while(1) 
     {
+        // process_sensor_values();    // Run every 10 sec
+        // systickDelayMs(10000);      // Delay 10 seconds
         __WFI();
     }
     return 0;

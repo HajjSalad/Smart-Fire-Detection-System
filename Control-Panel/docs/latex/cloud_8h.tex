@@ -1,0 +1,58 @@
+\doxysection{main/cloud.h File Reference}
+\hypertarget{cloud_8h}{}\label{cloud_8h}\index{main/cloud.h@{main/cloud.h}}
+
+
+MQTT Cloud Connectivity Header.  
+
+
+{\ttfamily \#include "{}mqtt\+\_\+client.\+h"{}}\newline
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{cloud_8h_a23111a2f4585204ffeeaaec70247be3c}{mqtt\+\_\+app\+\_\+start}} (void)
+\begin{DoxyCompactList}\small\item\em Initializes and starts the MQTT client. \end{DoxyCompactList}\item 
+esp\+\_\+mqtt\+\_\+client\+\_\+handle\+\_\+t \mbox{\hyperlink{cloud_8h_adb6a59b34714a748610faa1c245dd417}{get\+\_\+mqtt\+\_\+client}} (void)
+\begin{DoxyCompactList}\small\item\em Retrieves the current MQTT client handle. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+MQTT Cloud Connectivity Header. 
+
+Provides functions for initializing and interacting with an MQTT client over TLS for cloud-\/based IoT applications. 
+
+\label{doc-func-members}
+\Hypertarget{cloud_8h_doc-func-members}
+\doxysubsection{Function Documentation}
+\Hypertarget{cloud_8h_adb6a59b34714a748610faa1c245dd417}\index{cloud.h@{cloud.h}!get\_mqtt\_client@{get\_mqtt\_client}}
+\index{get\_mqtt\_client@{get\_mqtt\_client}!cloud.h@{cloud.h}}
+\doxysubsubsection{\texorpdfstring{get\_mqtt\_client()}{get\_mqtt\_client()}}
+{\footnotesize\ttfamily \label{cloud_8h_adb6a59b34714a748610faa1c245dd417} 
+esp\+\_\+mqtt\+\_\+client\+\_\+handle\+\_\+t get\+\_\+mqtt\+\_\+client (\begin{DoxyParamCaption}\item[{void}]{}{}\end{DoxyParamCaption})}
+
+
+
+Retrieves the current MQTT client handle. 
+
+\begin{DoxyReturn}{Returns}
+esp\+\_\+mqtt\+\_\+client\+\_\+handle\+\_\+t The MQTT client instance.
+\end{DoxyReturn}
+Retrieves the current MQTT client handle.
+
+\begin{DoxyReturn}{Returns}
+esp\+\_\+mqtt\+\_\+client\+\_\+handle\+\_\+t The MQTT client instance. 
+\end{DoxyReturn}
+\Hypertarget{cloud_8h_a23111a2f4585204ffeeaaec70247be3c}\index{cloud.h@{cloud.h}!mqtt\_app\_start@{mqtt\_app\_start}}
+\index{mqtt\_app\_start@{mqtt\_app\_start}!cloud.h@{cloud.h}}
+\doxysubsubsection{\texorpdfstring{mqtt\_app\_start()}{mqtt\_app\_start()}}
+{\footnotesize\ttfamily \label{cloud_8h_a23111a2f4585204ffeeaaec70247be3c} 
+void mqtt\+\_\+app\+\_\+start (\begin{DoxyParamCaption}\item[{void}]{}{}\end{DoxyParamCaption})}
+
+
+
+Initializes and starts the MQTT client. 
+
+This function sets up the MQTT client using TLS with a specified broker, client certificate, and private key. It registers the event handler and initiates the connection to the broker.
+
+Initializes and starts the MQTT client.
+
+Sets up the MQTT broker address, certificates, private key, and event handler. Starts the client connection process. 

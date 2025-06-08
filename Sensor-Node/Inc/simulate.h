@@ -37,8 +37,8 @@ extern Range sensor_ranges[NUM_GROUPS][MAX_SENSOR_PER_GROUP];
 void Systick_Runner();
 void add_to_buffer(CircularBuffer* buffer, float value);
 //void trigger_anomaly_interrupt(void);
-float simulate_sensor_value(int group, int sensorIndex);
+float simulate_sensor_value(int group, int sensorIndex, int anomaly_index);
 void process_sensor_values();
-void print_last_values(CircularBuffer* buffers, int numBuffers);
+void print_stored_sensor_values(CircularBuffer* buffers, int numBuffers);
 
 #endif // SIMULATE_H

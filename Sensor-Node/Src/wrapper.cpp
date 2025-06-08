@@ -10,7 +10,6 @@
 #include <vector>
 #include <stdexcept>
 
-
 struct SensorGroupImpl {
     std::vector<std::unique_ptr<Sensor>> sensors;
     
@@ -94,6 +93,13 @@ float get_sensor_value(SensorGroup group, int index) {
         return 0.0f;
     }
     return impl->get_value(index);
+}
+
+const char* get_sensor_name(SensorGroup group, int index) {
+    if (!group) return "InvalidGroup";
+    SensorGroupImpl* impl = static_cast<SensorGroupImpl*>(group);
+    if (index < 0 || index >= impl->count()) return "InvalidIndex";
+    return impl->sensors[index]->getName();
 }
 
 } // extern "C"

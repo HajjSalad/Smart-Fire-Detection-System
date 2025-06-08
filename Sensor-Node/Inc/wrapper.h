@@ -22,6 +22,9 @@ void set_sensor_value(SensorGroup group, int index, float value);
 // Get a sensor's value
 float get_sensor_value(SensorGroup group, int index);
 
+// Get sensor name
+const char* get_sensor_name(SensorGroup group, int index);
+
 #ifdef __cplusplus
 }
 #endif

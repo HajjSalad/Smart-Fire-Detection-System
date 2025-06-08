@@ -38,8 +38,6 @@ volatile uint16_t tx_index = 0;
 
 volatile SPI_Response response_queue[RESPONSE_QUEUE_SIZE];
 
-
-
 void queue_response(ResponseType type, const void *data, uint16_t length) {
     response_queue[0].type = type;
     response_queue[0].length = (length > BUFFER_SIZE) ? BUFFER_SIZE : length;
@@ -68,7 +66,7 @@ void prepare_queued_response(bool clean_rx) {
 
 // Handle the Master data received
 void process_spi_command(void) {
-    printf("Received from Master: %s\r", rx_buffer);
+    //printf("Received from Master: %s\r", rx_buffer);
            
     if (strncmp((char*)rx_buffer, "Are you Alive?", strlen("Are you Alive?")) == 0) {
         queue_response(RESPONSE_TEXT, "I'm Alive", strlen("I'm Alive"));
@@ -76,7 +74,7 @@ void process_spi_command(void) {
     else if (strncmp((char*)rx_buffer, "Data Request", strlen("Data Request")) == 0) {
         __attribute__((aligned(4))) float sensor_data[10] = {1.1f, 2.2f, 3.3f, 4.4f, 5.5f, 6.6f, 7.7f, 8.8f, 9.9f, 10.10f};
         queue_response(RESPONSE_BUFFER, sensor_data, 10 * sizeof(float));
-
+        
     }
     else {
         queue_response(RESPONSE_TEXT, "Unknown command", strlen("Unknown command"));
@@ -98,7 +96,7 @@ void SPI1_IRQHandler(void) {
                 rx_buffer[rx_index] = '\0';
                 rx_index = 0;
 
-                printf("\nMaster command received.\r\n");
+                //printf("\nMaster command received.\r\n");
                 process_spi_command();     // Only queue response, Sent in next SPI transaction
             }
             SPI1->DR = DUMMY_BYTE;         // Respond with dummy
@@ -115,10 +113,10 @@ void SPI1_IRQHandler(void) {
             }
 
             if (tx_index >= response_queue[0].length) {
-                printf("Response sent to Master: ");
+                //printf("Response sent to Master: ");
                 // print the data sent to master here
                 for (uint16_t i = 0; i < response_queue[0].length; i++) {
-                    printf("%02X ", tx_buffer[i]);
+                    //printf("%02X ", tx_buffer[i]);
                 }
                 printf("\r\n");
                 response_queue[0].ready = false;
