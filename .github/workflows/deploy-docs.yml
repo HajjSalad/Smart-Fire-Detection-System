@@ -1,0 +1,40 @@
+name: Deploy Doxygen Docs to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy-docs:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Install Doxygen
+      run: sudo apt-get install -y doxygen graphviz
+
+    - name: Generate Doxygen Docs (ESP32)
+      working-directory: ./Control-Panel
+      run: doxygen Doxyfile
+
+    - name: Generate Doxygen Docs (STM32)
+      working-directory: ./Sensor-Node
+      run: doxygen Doxyfile
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./gh-pages-temp
+        keep_files: true
+
+    - name: Copy docs to gh-pages layout
+      run: |
+        mkdir -p gh-pages-temp/esp32
+        mkdir -p gh-pages-temp/stm32
+        cp -r Control-Panel/docs/html/* gh-pages-temp/esp32/
+        cp -r Sensor-Node/docs/html/* gh-pages-temp/stm32/
