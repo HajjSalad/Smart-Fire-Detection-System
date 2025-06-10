@@ -24,7 +24,7 @@
 */
 var NAVTREE =
 [
-  [ "Smart Fire Detection - ESP32 Control Panel", "index.html", [
+  [ "ESP32 Control Panel", "index.html", [
     [ "Files", "files.html", [
       [ "File List", "files.html", "files_dup" ],
       [ "File Members", "globals.html", [

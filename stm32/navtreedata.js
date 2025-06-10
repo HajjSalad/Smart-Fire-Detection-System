@@ -24,7 +24,7 @@
 */
 var NAVTREE =
 [
-  [ "Smart Fire Detection - STM32 Sensor Node", "index.html", [
+  [ "STM32 Sensor Node", "index.html", [
     [ "Classes", "annotated.html", [
       [ "Class List", "annotated.html", "annotated_dup" ],
       [ "Class Index", "classes.html", null ],
