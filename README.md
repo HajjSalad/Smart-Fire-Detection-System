@@ -23,7 +23,7 @@ An IoT-enabled fire safety solution featuring:
 &nbsp;&nbsp;&nbsp;♨️ **Smart Sensing**: Ambient Light, Thermal IR sensors    
 &nbsp;&nbsp;&nbsp;*(Supports up to 8 sensors per node with configurable thresholds)*   
 
-✅ **Fire Alarm Control Panel Node (ESP32)** (Notes on [Notion](https://hajjsalad.notion.site/ESP32-Master-Notes-202a741b5aab80f1bd4bc3d5a1b6f6fd)) ([Doxygen](https://hajjsalad.github.io/Smart-Fire-Detection-System/esp32/) Documentation)        
+✅ **Fire Alarm Control Panel Node (ESP32)** ([Notes on Notion](https://hajjsalad.notion.site/ESP32-Master-Notes-202a741b5aab80f1bd4bc3d5a1b6f6fd)) ([Doxygen Documentation](https://hajjsalad.github.io/Smart-Fire-Detection-System/esp32/))        
 &nbsp;&nbsp;&nbsp;• **Active Monitoring**: Periodically checks sensor node health via SPI.  
 &nbsp;&nbsp;&nbsp;• **Event-Driven Response**: Instantly reacts to interrupt-based anomaly alerts from sensor nodes.  
 &nbsp;&nbsp;&nbsp;• **Scalable Architecture**: Supports daisy-chaining multiple sensor nodes for large-scale deployments.  
