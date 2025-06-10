@@ -25,12 +25,6 @@ jobs:
       working-directory: ./Sensor-Node
       run: doxygen Doxyfile
 
-    - name: Debug ESP32 docs files
-      run: ls -l Control-Panel/docs/html/
-
-    - name: Debug STM32 docs files
-      run: ls -l Sensor-Node/docs/html/
-
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
@@ -44,3 +38,9 @@ jobs:
         mkdir -p gh-pages-temp/stm32
         cp -r Control-Panel/docs/html/* gh-pages-temp/esp32/
         cp -r Sensor-Node/docs/html/* gh-pages-temp/stm32/
+
+    - name: Debug copied ESP32 docs files
+      run: ls -l gh-pages-temp/esp32/
+
+    - name: Debug copied STM32 docs files
+      run: ls -l gh-pages-temp/stm32/
