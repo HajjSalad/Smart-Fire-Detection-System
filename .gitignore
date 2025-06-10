@@ -1,0 +1,21 @@
+# Ignore object files and binaries
+*.o
+*.out
+*.exe
+*.bin
+*.elf
+
+# Ignore build directories
+
+
+# Ignore logs
+
+
+# Ignore editor-specific files
+*.swp
+.vscode/
+.idea/
+.DS_Store
+
+# Ignore IDE-specific project settings
+.settings/
