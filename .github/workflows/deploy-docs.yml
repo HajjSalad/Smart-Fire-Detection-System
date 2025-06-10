@@ -25,6 +25,12 @@ jobs:
       working-directory: ./Sensor-Node
       run: doxygen Doxyfile
 
+    - name: Debug ESP32 docs files
+      run: ls -l Control-Panel/docs/html/
+
+    - name: Debug STM32 docs files
+      run: ls -l Sensor-Node/docs/html/
+
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
