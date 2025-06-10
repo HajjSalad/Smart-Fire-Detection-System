@@ -16,6 +16,7 @@
 .vscode/
 .idea/
 .DS_Store
+.nojekyll
 
 # Ignore IDE-specific project settings
 .settings/
