@@ -16,7 +16,7 @@ An IoT-enabled fire safety solution featuring:
 &nbsp;&nbsp;&nbsp;• **Abstract Factory Pattern** in C++ for dynamic sensor management.  
 &nbsp;&nbsp;&nbsp;• **Plug-and-play expandability**: Add more Sensor Nodes to the FACP for larger deployments.  
 
-✅ **Multi-Sensor Monitoring (Sensor Node STM32) (Notes on [Notion](https://hajjsalad.notion.site/STM32-Slave-Notes-202a741b5aab803dbfbcdb8398551fd2))**        
+✅ **Multi-Sensor Monitoring (Sensor Node STM32)** (Notes on [Notion](https://hajjsalad.notion.site/STM32-Slave-Notes-202a741b5aab803dbfbcdb8398551fd2)) ([Doxygen](https://hajjsalad.github.io/Smart-Fire-Detection-System/esp32/files.html) Documentation)           
 &nbsp;&nbsp;&nbsp;The sensor node has 3 groups of sensors:  
 &nbsp;&nbsp;&nbsp;🔥 **Fire Detection**: Temperature, Smoke, Gas, Flame sensors    
 &nbsp;&nbsp;&nbsp;💧 **Environmental**: Humidity, VOC sensors  
