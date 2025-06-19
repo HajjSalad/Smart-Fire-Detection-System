@@ -2,6 +2,8 @@
 #include "simulate.h"
 #include "wrapper.h"
 #include "systick.h"
+#include "spi_comm.h"
+#include "queue.h"
 
 #include <time.h>
 #include <stdio.h>
@@ -11,10 +13,31 @@
 #include "stm32f446xx.h"
 
 bool createAnomaly = false;
-
 SensorGroup* group[NUM_GROUPS];                         // Array pointers for sensor groups
-bool anomalyFlag[MAX_SENSOR];                           // Instantiate a flag for each sensor
+bool queuedItems[MAX_SENSOR];
 CircularBuffer sensorBuffers[MAX_SENSOR];               // Instantiate a circular buffer for each sensor
+static bool simulation_enabled = false;                 // Flag to control simulation start and stop
+
+// Initialize buffer fields to 0 when created
+void init_circular_buffer(CircularBuffer* buffer) {
+    buffer->head = 0;
+    buffer->count = 0;
+    buffer->min = 0.0f;
+    buffer->max = 0.0f;
+
+    // Initialize all elements to 0.0
+    for (int i=0; i < CIRC_BUFFER_SIZE; i++) {
+        buffer->data[i] = 0.0f;
+    }
+}
+
+// Initialize all buffers
+void init_all_buffers() {
+    //printf("Initializing all buffers\r\n");
+    for (int i=0; i < MAX_SENSOR; i++) {
+        init_circular_buffer(&sensorBuffers[i]);
+    }
+}
 
 Range sensor_ranges[NUM_GROUPS][MAX_SENSOR_PER_GROUP] = {
     { 
@@ -33,15 +56,42 @@ Range sensor_ranges[NUM_GROUPS][MAX_SENSOR_PER_GROUP] = {
     }
 };
 
-void print_stored_sensor_values(CircularBuffer* buffers, int numBuffers) {
-    for (int i = 0; i < numBuffers; i++) {
-        if (buffers[i].count == 0) {
-            printf("Buffer %d is empty\r\n", i);
-            continue;
+void start_simulation() {
+    simulation_enabled = true;
+}
+
+void stop_simulation() {
+    simulation_enabled = false;
+}
+
+void print_stored_sensor_values(CircularBuffer* buffer, int anomalyIndex) {
+    printf("Sensor %d buffer: [ ", anomalyIndex);
+
+    if (buffer->count == 0) {
+        // Buffer is empty, print zeros
+        for (int i=0; i < CIRC_BUFFER_SIZE; i++) {
+            if (i == CIRC_BUFFER_SIZE - 1) {
+                printf("0.00 ]");
+            } else {
+                printf("0.00, ");
+            }
         }
-        int lastIndex = (buffers[i].head - 1 + CIRC_BUFFER_SIZE) % CIRC_BUFFER_SIZE;
-        float lastValue = buffers[i].data[lastIndex];
-        printf("Buffer %d - Last Value: %.2f\r\n", i, lastValue);
+    } else {
+        // Print stored values
+        for (int i = 0; i < CIRC_BUFFER_SIZE; i++) {
+            if (i == CIRC_BUFFER_SIZE - 1) {
+                printf("%.2f ]", buffer->data[i]);
+            } else {
+                printf("%.2f, ", buffer->data[i]);
+            }
+            // if (buffers[i].count == 0) {
+            //     printf("Buffer %d is empty\r\n", i);
+            //     continue;
+            // }
+            // int value = (buffers[i].head - 1 + CIRC_BUFFER_SIZE) % CIRC_BUFFER_SIZE;
+            // float lastValue = buffers[i].data[lastIndex];
+            // printf("Buffer %d: %.2f\r\n", i, value);
+        }
     }
 }
 
@@ -56,6 +106,7 @@ void add_to_buffer(CircularBuffer* buffer, float value) {
     if (buffer->count < CIRC_BUFFER_SIZE) {                 
         buffer->count++;       // update count
     }
+    // printf("Sensor values recorded: %d\n\r", buffer->count);
 
     // Recalculate min and max for the current buffer data 
     buffer->min = buffer->max = buffer->data[0];
@@ -66,46 +117,30 @@ void add_to_buffer(CircularBuffer* buffer, float value) {
     }
 }
 
-// Notify the ESP32 of the anomaly
-// void trigger_anomaly_interrupt(void) {
-//     GPIOB->ODR |= (1 << 6);
-//     for (volatile int d = 0; d < 1000; d++);
-//     GPIOB->ODR &= ~(1 << 6);
-// }
-
 // For simulation purposes, we assume all sensors generate float data 
-float simulate_sensor_value(int group, int sensorIndex, int anomalyIndex) {
-    Range r = sensor_ranges[group][sensorIndex];
+float simulate_sensor_value(int group, int localIndex, int sensorIndex, int anomalyIndex) {
+    //printf("SensorIndex: %d, AnomalyIndex: %d\n\r", sensorIndex, anomalyIndex);
+    Range r = sensor_ranges[group][localIndex];
 
     if (sensorIndex == anomalyIndex) {        // Generate a value out of range
+        //printf("SensorIndex: %d, AnomalyIndex: %d\n\r", sensorIndex, anomalyIndex);
         // createAnomaly = false;                  // Reset flag
-        float offset = (rand() % 2 == 0) ? -50.0f : 50.0f;
-        return r.max + offset;
+        // Use ±30% of the range as anomaly offset
+        float percent_offset = 0.30f * (r.max - r.min);
+        float value;
+
+        if (rand() % 2 == 0) {
+            value = r.max + percent_offset;  // Above max
+        } else {
+            value = r.min - percent_offset;  // Below min
+        }
+        return value;
     } else {                    // Generate random float within range
         float scale = rand() / (float) RAND_MAX; 
         float value = r.min + scale * (r.max - r.min);
         return value;
     }
 }
-
-// Call the function every 10 seconds
-void Systick_Runner(void) {
-    ms_ticks++;
-    
-    if (ms_ticks >= 10000) {        // Every 10sec
-        process_sensor_values();
-        ms_ticks = 0;  // Reset timer
-    }
-}
-
-// void sendTrigger(void) {
-//     printf("\nSet interrupt line high\r\n");
-//         GPIOB->ODR |= (1<<6);       // Set interrupt line high
-//   
-//         // systickDelayMs(50);
-//         GPIOB->ODR &= ~(1<<6);      // Set interrupt line low 
-//         printf("Set interrupt line low\r\n");
-// }
 
 // Set the simulated value into the sensor and check for anomaly
 void process_sensor_values() {
@@ -117,7 +152,7 @@ void process_sensor_values() {
         int count = get_sensor_count(group[i]);
 
         for (int j = 0; j < count; j++) {
-            float value = simulate_sensor_value(i, j, anomalyIndex);
+            float value = simulate_sensor_value(i, j, sensorIndex, anomalyIndex);
             const char* name = get_sensor_name(group[i], j);
 
             // Set the value into the sensor 
@@ -131,25 +166,69 @@ void process_sensor_values() {
                 printf(" - within range\r\n");
             } else {
                 printf(" - out of range\r\n");          // Sensor value out of range
-                anomalyFlag[anomalyIndex] = true;        // Anomaly detected - raise flag
+                enqueue(anomalyIndex);
             }
-            //add_to_buffer(&sensorBuffers[sensorIndex], value);     // Add sensor value to its circular buffer
-
-            if (anomalyFlag[anomalyIndex]) {
-                //sendTrigger();                          // Trigger the interrupt line to notify ESP32
-                // Print the last 10 values of that sensor
-                //print_stored_sensor_values(&sensorBuffers[sensorIndex], 1);
-                anomalyFlag[anomalyIndex] = false;       // Reset flag
-            }
+            add_to_buffer(&sensorBuffers[sensorIndex], value);     // Add sensor value to its circular buffer
+            //printf("Added to Sensor %d buffer: %.2f\n\r", sensorIndex, value);
             sensorIndex++;
         }
+    }
+
+    printQueue();                                                               // Print current queue status
+    print_stored_sensor_values(&sensorBuffers[anomalyIndex], anomalyIndex);      // Print values of the flagged sensor
+}
+
+// This function is called every 5 seconds
+void systick_simulation(void) {
+    if (!simulation_enabled) return;        // Dont run if simulstion not enabled
+
+    ms_ticks++;
+    
+    if (ms_ticks >= 5000) {        // Every 5sec
+        process_sensor_values();
+        ms_ticks = 0;  // Reset timer
     }
 }
 
 
 
+Where to pick up:
+- modify systick_simulation such that:
+    - Simulate sensor values every 5 sec
+    - Simulate anomaly every 15 sec
+    
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// bool isInQueue(uint32_t anomalyIndex) {
+//     if (isQueueEmpty()) return false;
+//
+//     int current = front;
+//     while (true) {
+//         if (waitingQueue[current] == anomalyIndex) {
+//             return true;            // duplicate found
+//         }
+//         if (current == rear) break; // Reached end of queue
+//         current = (current + 1) % MAX_SENSOR;
+//     }
+//     return false;       // Not found
+// }
 
 // bool createAnomaly = false;
 

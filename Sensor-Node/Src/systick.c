@@ -25,12 +25,12 @@ volatile bool anomaly_trigger = false; /**< Flag to indicate anomaly event */
 /**
  * @brief SysTick interrupt handler.
  *
- * Increments the millisecond counter and calls `Systick_Runner()`
+ * Increments the millisecond counter and calls `systick_simulation()`
  * for periodic event simulation or testing.
  */
 void SysTick_Handler(void) {
 	systickMillis++;						// Increment milliseconds counter
-	Systick_Runner();				// Use this to trigger anomaly every 10sec for testing
+	systick_simulation();				    // Generates sensor values at defined simulation intervals
 }
 
 /**

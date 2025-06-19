@@ -2,6 +2,7 @@
 #include "uart.h"
 #include "demo.h"
 #include "spi.h"
+#include "spi_comm.h"
 #include "systick.h"
 #include "simulate.h"
 #include "wrapper.h"
@@ -59,23 +60,35 @@ int main() {
     spi1_slave_init();
     interrupt_line_init();
     systick_init();
+    init_all_buffers();
 
     printf("\nSTM32 Sensor Node Start\r\n");                                    
     printf("Demo Message: %s\r\n", demo_get_message());    // Make sure C++ is working
-    printf("\nTesting101\r\n");
+    printf("\nTesting109\r\n");
 
     srand(time(NULL));
-    generate_sensors();
-    // process_sensor_values();
+    generate_sensors();             // Create sensors
+    start_simulation();             // Start simulation
 
     while(1) 
     {
-        // process_sensor_values();    // Run every 10 sec
-        // systickDelayMs(10000);      // Delay 10 seconds
         __WFI();
     }
     return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

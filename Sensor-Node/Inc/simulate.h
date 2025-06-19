@@ -23,8 +23,8 @@ typedef struct {
 } CircularBuffer; 
 
 extern SensorGroup* group[NUM_GROUPS];
-extern int groupSensorCount[NUM_GROUPS];
 extern bool anomalyFlag[MAX_SENSOR];
+extern bool queuedItems[MAX_SENSOR];
 extern CircularBuffer sensorBuffers[MAX_SENSOR];       
 
 typedef struct {
@@ -34,11 +34,13 @@ typedef struct {
 
 extern Range sensor_ranges[NUM_GROUPS][MAX_SENSOR_PER_GROUP];
 
-void Systick_Runner();
-void add_to_buffer(CircularBuffer* buffer, float value);
-//void trigger_anomaly_interrupt(void);
-float simulate_sensor_value(int group, int sensorIndex, int anomaly_index);
-void process_sensor_values();
+void init_all_buffers();
+void start_simulation();
+void stop_simulation();
 void print_stored_sensor_values(CircularBuffer* buffers, int numBuffers);
+void add_to_buffer(CircularBuffer* buffer, float value);
+float simulate_sensor_value(int group, int localIndex, int sensorIndex, int anomaly_index);
+void process_sensor_values();
+void systick_simulation();
 
 #endif // SIMULATE_H
