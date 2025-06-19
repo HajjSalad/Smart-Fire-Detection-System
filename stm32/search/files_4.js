@@ -1,5 +1,13 @@
 var searchData=
 [
-  ['uart_2ec_0',['uart.c',['../uart_8c.html',1,'']]],
-  ['uart_2eh_1',['uart.h',['../uart_8h.html',1,'']]]
+  ['sensor_2ecpp_0',['sensor.cpp',['../sensor_8cpp.html',1,'']]],
+  ['sensor_2eh_1',['sensor.h',['../sensor_8h.html',1,'']]],
+  ['simulate_2ec_2',['simulate.c',['../simulate_8c.html',1,'']]],
+  ['simulate_2eh_3',['simulate.h',['../simulate_8h.html',1,'']]],
+  ['spi_2ec_4',['spi.c',['../spi_8c.html',1,'']]],
+  ['spi_2eh_5',['spi.h',['../spi_8h.html',1,'']]],
+  ['spi_5fcomm_2ec_6',['spi_comm.c',['../spi__comm_8c.html',1,'']]],
+  ['spi_5fcomm_2eh_7',['spi_comm.h',['../spi__comm_8h.html',1,'']]],
+  ['systick_2ec_8',['systick.c',['../systick_8c.html',1,'']]],
+  ['systick_2eh_9',['systick.h',['../systick_8h.html',1,'']]]
 ];

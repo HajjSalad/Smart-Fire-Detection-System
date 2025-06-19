@@ -2,7 +2,7 @@ var searchData=
 [
   ['circ_5fbuffer_5fsize_0',['CIRC_BUFFER_SIZE',['../simulate_8h.html#aa5ca2c86845f72ebb719d7019a081739',1,'simulate.h']]],
   ['circularbuffer_1',['CircularBuffer',['../structCircularBuffer.html',1,'']]],
-  ['command_5fcomplete_2',['command_complete',['../spi_8c.html#a160447dda6333916807063754b81e309',1,'command_complete:&#160;spi.c'],['../spi_8h.html#a160447dda6333916807063754b81e309',1,'command_complete:&#160;spi.c']]],
+  ['command_5fcomplete_2',['command_complete',['../spi__comm_8c.html#a160447dda6333916807063754b81e309',1,'command_complete:&#160;spi_comm.c'],['../spi__comm_8h.html#a160447dda6333916807063754b81e309',1,'command_complete:&#160;spi_comm.c']]],
   ['count_3',['count',['../structCircularBuffer.html#aaa24379a9c517bfc80cc11655f2ec7be',1,'CircularBuffer::count'],['../structSensorGroupImpl.html#ab391efd31131a7be392a84e871e7d819',1,'SensorGroupImpl::count()']]],
   ['cpha_4',['CPHA',['../spi_8c.html#ad8529d2df242f4448a2e66aab0eef9a3',1,'spi.c']]],
   ['cpol_5',['CPOL',['../spi_8c.html#a0eb64d85804990e6ee5259451c7f5a0d',1,'spi.c']]],
