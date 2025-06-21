@@ -97,8 +97,10 @@ $(document).ready(function(){initNavTree('spi__comm_8c.html',''); initResizable(
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="spi_8h_source.html">spi.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="spi__comm_8h_source.html">spi_comm.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="queue_8h_source.html">queue.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="systick_8h_source.html">systick.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="spi__comm_8h_source.html">spi_comm.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="simulate_8h_source.html">simulate.h</a>&quot;</code><br />
 <code>#include &lt;stdio.h&gt;</code><br />
 <code>#include &lt;string.h&gt;</code><br />
 <code>#include &lt;stdlib.h&gt;</code><br />
@@ -117,6 +119,8 @@ Functions</h2></td></tr>
 <tr class="separator:acf2868940c8a28ae452af0d980fa1d87"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abc85b47e99b6c6345861fd040016033f" id="r_abc85b47e99b6c6345861fd040016033f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spi__comm_8c.html#abc85b47e99b6c6345861fd040016033f">prepare_queued_response</a> (bool clean_rx)</td></tr>
 <tr class="separator:abc85b47e99b6c6345861fd040016033f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8990c590daf1e654be6a544107bed3a1" id="r_a8990c590daf1e654be6a544107bed3a1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spi__comm_8c.html#a8990c590daf1e654be6a544107bed3a1">printData</a> ()</td></tr>
+<tr class="separator:a8990c590daf1e654be6a544107bed3a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a17c78b6ef2295361ef541cc11f795ff1" id="r_a17c78b6ef2295361ef541cc11f795ff1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spi__comm_8c.html#a17c78b6ef2295361ef541cc11f795ff1">process_spi_command</a> (void)</td></tr>
 <tr class="separator:a17c78b6ef2295361ef541cc11f795ff1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9bbd8c17ce4f49adcca47d11f482aab6" id="r_a9bbd8c17ce4f49adcca47d11f482aab6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="spi__comm_8c.html#a9bbd8c17ce4f49adcca47d11f482aab6">SPI1_IRQHandler</a> (void)</td></tr>
@@ -202,6 +206,23 @@ Variables</h2></td></tr>
           <td>(</td>
           <td class="paramtype">bool&#160;</td>
           <td class="paramname"><em>clean_rx</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8990c590daf1e654be6a544107bed3a1" name="a8990c590daf1e654be6a544107bed3a1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8990c590daf1e654be6a544107bed3a1">&#9670;&#160;</a></span>printData()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void printData </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
           <td></td>
         </tr>
       </table>

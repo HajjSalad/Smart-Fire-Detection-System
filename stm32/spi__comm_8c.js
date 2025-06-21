@@ -4,6 +4,7 @@ var spi__comm_8c =
     [ "SR_RXNE", "spi__comm_8c.html#aed03e243a44089845577cb6faba3f696", null ],
     [ "EXTI4_IRQHandler", "spi__comm_8c.html#a290cb997018c8d85d4b965b4a242842f", null ],
     [ "prepare_queued_response", "spi__comm_8c.html#abc85b47e99b6c6345861fd040016033f", null ],
+    [ "printData", "spi__comm_8c.html#a8990c590daf1e654be6a544107bed3a1", null ],
     [ "process_spi_command", "spi__comm_8c.html#a17c78b6ef2295361ef541cc11f795ff1", null ],
     [ "queue_response", "spi__comm_8c.html#acf2868940c8a28ae452af0d980fa1d87", null ],
     [ "SPI1_IRQHandler", "spi__comm_8c.html#a9bbd8c17ce4f49adcca47d11f482aab6", null ],

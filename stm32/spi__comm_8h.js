@@ -12,6 +12,7 @@ var spi__comm_8h =
       [ "RESPONSE_BUFFER", "spi__comm_8h.html#af5055605e320b3f9ea9fa330b57604e7afa6bc43cb9b763a444871d3677bd6a4c", null ]
     ] ],
     [ "prepare_queued_response", "spi__comm_8h.html#abc85b47e99b6c6345861fd040016033f", null ],
+    [ "printData", "spi__comm_8h.html#a8990c590daf1e654be6a544107bed3a1", null ],
     [ "process_spi_command", "spi__comm_8h.html#a17c78b6ef2295361ef541cc11f795ff1", null ],
     [ "queue_response", "spi__comm_8h.html#acf2868940c8a28ae452af0d980fa1d87", null ],
     [ "command_complete", "spi__comm_8h.html#a160447dda6333916807063754b81e309", null ],

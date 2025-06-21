@@ -123,6 +123,8 @@ Functions</h2></td></tr>
 <tr class="separator:a6359ba0cda755143e8bcbe793bff468d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a158c1720e23a876ca7cc8328c3be06e7" id="r_a158c1720e23a876ca7cc8328c3be06e7"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="simulate_8c.html#a158c1720e23a876ca7cc8328c3be06e7">simulate_sensor_value</a> (int <a class="el" href="simulate_8c.html#ab2d24ad633d1c2b24443054cccbe6c36">group</a>, int localIndex, int sensorIndex, int anomalyIndex)</td></tr>
 <tr class="separator:a158c1720e23a876ca7cc8328c3be06e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aab3bb822a4aaf9d1a724ecb780fa6e25" id="r_aab3bb822a4aaf9d1a724ecb780fa6e25"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="simulate_8c.html#aab3bb822a4aaf9d1a724ecb780fa6e25">sendTrigger</a> (void)</td></tr>
+<tr class="separator:aab3bb822a4aaf9d1a724ecb780fa6e25"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa050a7459f68cc0b0947b42675de4bc5" id="r_aa050a7459f68cc0b0947b42675de4bc5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="simulate_8c.html#aa050a7459f68cc0b0947b42675de4bc5">process_sensor_values</a> (bool injectAnomaly)</td></tr>
 <tr class="separator:aa050a7459f68cc0b0947b42675de4bc5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5d8f30a1ea0d2797e740dbe542fe8718" id="r_a5d8f30a1ea0d2797e740dbe542fe8718"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="simulate_8c.html#a5d8f30a1ea0d2797e740dbe542fe8718">systick_simulation</a> (void)</td></tr>
@@ -132,6 +134,8 @@ Functions</h2></td></tr>
 Variables</h2></td></tr>
 <tr class="memitem:a6093d508b524726d14963d1a892d8616" id="r_a6093d508b524726d14963d1a892d8616"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="simulate_8c.html#a6093d508b524726d14963d1a892d8616">createAnomaly</a> = false</td></tr>
 <tr class="separator:a6093d508b524726d14963d1a892d8616"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a51690879891be1d99db3c99e51846d18" id="r_a51690879891be1d99db3c99e51846d18"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="simulate_8c.html#a51690879891be1d99db3c99e51846d18">triggerFlag</a> = false</td></tr>
+<tr class="separator:a51690879891be1d99db3c99e51846d18"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab2d24ad633d1c2b24443054cccbe6c36" id="r_ab2d24ad633d1c2b24443054cccbe6c36"><td class="memItemLeft" align="right" valign="top"><a class="el" href="wrapper_8h.html#a076fbdc801647a7f435740ddf7d02442">SensorGroup</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="simulate_8c.html#ab2d24ad633d1c2b24443054cccbe6c36">group</a> [<a class="el" href="simulate_8h.html#a2f8994530e12ef2e41dfb2ccb0f42d9c">NUM_GROUPS</a>]</td></tr>
 <tr class="separator:ab2d24ad633d1c2b24443054cccbe6c36"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab2cce4665a997c7069ea6a38682a9f30" id="r_ab2cce4665a997c7069ea6a38682a9f30"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="simulate_8c.html#ab2cce4665a997c7069ea6a38682a9f30">queuedItems</a> [<a class="el" href="simulate_8h.html#ab31fd7569f9643816a5f7715e65cd172">MAX_SENSOR</a>]</td></tr>
@@ -244,6 +248,24 @@ Variables</h2></td></tr>
           <td>(</td>
           <td class="paramtype">bool&#160;</td>
           <td class="paramname"><em>injectAnomaly</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aab3bb822a4aaf9d1a724ecb780fa6e25" name="aab3bb822a4aaf9d1a724ecb780fa6e25"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aab3bb822a4aaf9d1a724ecb780fa6e25">&#9670;&#160;</a></span>sendTrigger()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void sendTrigger </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -424,6 +446,20 @@ Variables</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname"><a class="el" href="structCircularBuffer.html">CircularBuffer</a> sensorBuffers[<a class="el" href="simulate_8h.html#ab31fd7569f9643816a5f7715e65cd172">MAX_SENSOR</a>]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a51690879891be1d99db3c99e51846d18" name="a51690879891be1d99db3c99e51846d18"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a51690879891be1d99db3c99e51846d18">&#9670;&#160;</a></span>triggerFlag</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool triggerFlag = false</td>
         </tr>
       </table>
 </div><div class="memdoc">

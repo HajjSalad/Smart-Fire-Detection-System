@@ -5,6 +5,7 @@ var simulate_8c =
     [ "init_circular_buffer", "simulate_8c.html#a3b1d7a0d0d890b3b14d3a87a4b49bff6", null ],
     [ "print_stored_sensor_values", "simulate_8c.html#a3fbf08d6182ee5d371606948e7075c19", null ],
     [ "process_sensor_values", "simulate_8c.html#aa050a7459f68cc0b0947b42675de4bc5", null ],
+    [ "sendTrigger", "simulate_8c.html#aab3bb822a4aaf9d1a724ecb780fa6e25", null ],
     [ "simulate_sensor_value", "simulate_8c.html#a158c1720e23a876ca7cc8328c3be06e7", null ],
     [ "start_simulation", "simulate_8c.html#a3873de1556157613f48290815d0eecaf", null ],
     [ "stop_simulation", "simulate_8c.html#a4e7be6ff693388bf45c091a55fad0e96", null ],
@@ -13,5 +14,6 @@ var simulate_8c =
     [ "group", "simulate_8c.html#ab2d24ad633d1c2b24443054cccbe6c36", null ],
     [ "queuedItems", "simulate_8c.html#ab2cce4665a997c7069ea6a38682a9f30", null ],
     [ "sensor_ranges", "simulate_8c.html#ae5b87c9493205452b5e88ce731b30408", null ],
-    [ "sensorBuffers", "simulate_8c.html#afa60d04905365e0ce65837f72fec5f26", null ]
+    [ "sensorBuffers", "simulate_8c.html#afa60d04905365e0ce65837f72fec5f26", null ],
+    [ "triggerFlag", "simulate_8c.html#a51690879891be1d99db3c99e51846d18", null ]
 ];
