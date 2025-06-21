@@ -9,7 +9,7 @@ var simulate_8h =
     [ "add_to_buffer", "simulate_8h.html#a6359ba0cda755143e8bcbe793bff468d", null ],
     [ "init_all_buffers", "simulate_8h.html#ab9fc174e0dd6f021c4b537b8d7e34f6d", null ],
     [ "print_stored_sensor_values", "simulate_8h.html#a1aa8aca770a597def03d4d9492e77224", null ],
-    [ "process_sensor_values", "simulate_8h.html#a8a1002a76eb3b86c1d89658b1892ac8d", null ],
+    [ "process_sensor_values", "simulate_8h.html#aa050a7459f68cc0b0947b42675de4bc5", null ],
     [ "simulate_sensor_value", "simulate_8h.html#a060e3d5522f12db5e2e6ef2497fe8bf0", null ],
     [ "start_simulation", "simulate_8h.html#a3873de1556157613f48290815d0eecaf", null ],
     [ "stop_simulation", "simulate_8h.html#a4e7be6ff693388bf45c091a55fad0e96", null ],
