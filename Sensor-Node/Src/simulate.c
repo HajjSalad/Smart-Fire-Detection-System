@@ -143,10 +143,12 @@ float simulate_sensor_value(int group, int localIndex, int sensorIndex, int anom
 }
 
 // Set the simulated value into the sensor and check for anomaly
-void process_sensor_values() {
+void process_sensor_values(bool injectAnomaly) {
     int sensorIndex = 0;
-    int anomalyIndex = (rand() % MAX_SENSOR);
-    printf("\nAnomaly will be on sensor Index: %d\r\n", anomalyIndex);
+    int anomalyIndex = (injectAnomaly) ? (rand() % MAX_SENSOR) : -1;
+    if (injectAnomaly) {
+        printf("\nAnomaly will be on sensor Index: %d\r\n", anomalyIndex);
+    }
 
     for (int i = 0; i < NUM_GROUPS; i++) {
         int count = get_sensor_count(group[i]);
@@ -173,30 +175,31 @@ void process_sensor_values() {
             sensorIndex++;
         }
     }
+    
+    if (injectAnomaly) {
+        printQueue();                                                               // Print current queue status
+        printf("After printQueue");
+        print_stored_sensor_values(&sensorBuffers[anomalyIndex], anomalyIndex);      // Print anomaly buffer values
+    } 
 
-    printQueue();                                                               // Print current queue status
-    print_stored_sensor_values(&sensorBuffers[anomalyIndex], anomalyIndex);      // Print values of the flagged sensor
 }
 
-// This function is called every 5 seconds
 void systick_simulation(void) {
-    if (!simulation_enabled) return;        // Dont run if simulstion not enabled
+    if (!simulation_enabled) return;        // Dont run if simulation not enabled
 
     ms_ticks++;
+
+    if (ms_ticks % 15000 == 0) {            // Every 15secs anomaly on one sensor value
+        process_sensor_values(true);
+    } else if (ms_ticks % 5000 == 0) {
+        process_sensor_values(false);        // Every 5 sec - Simulate normal values for all sensors
+    }
     
-    if (ms_ticks >= 5000) {        // Every 5sec
-        process_sensor_values();
+    if (ms_ticks >= 15000) {
         ms_ticks = 0;  // Reset timer
     }
 }
 
-
-
-Where to pick up:
-- modify systick_simulation such that:
-    - Simulate sensor values every 5 sec
-    - Simulate anomaly every 15 sec
-    
 
 
 

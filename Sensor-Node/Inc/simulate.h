@@ -40,7 +40,7 @@ void stop_simulation();
 void print_stored_sensor_values(CircularBuffer* buffers, int numBuffers);
 void add_to_buffer(CircularBuffer* buffer, float value);
 float simulate_sensor_value(int group, int localIndex, int sensorIndex, int anomaly_index);
-void process_sensor_values();
+void process_sensor_values(bool injectAnomaly);
 void systick_simulation();
 
 #endif // SIMULATE_H

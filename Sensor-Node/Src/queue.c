@@ -59,7 +59,7 @@ uint32_t dequeue() {
 
 void printQueue() {
     if (isQueueEmpty()) {
-        printf("Queue is empty\n");
+        printf("Queue is empty\n\r");
         return;
     }
     
