@@ -13,6 +13,7 @@
 #include "stm32f446xx.h"
 
 bool createAnomaly = false;
+bool triggerFlag = false;
 SensorGroup* group[NUM_GROUPS];                         // Array pointers for sensor groups
 bool queuedItems[MAX_SENSOR];
 CircularBuffer sensorBuffers[MAX_SENSOR];               // Instantiate a circular buffer for each sensor
@@ -142,12 +143,22 @@ float simulate_sensor_value(int group, int localIndex, int sensorIndex, int anom
     }
 }
 
+void sendTrigger(void) {
+    //printf("\nSet interrupt line high. ");
+    GPIOB->ODR |= (1<<6);       // Set interrupt line high
+
+    // systickDelayMs(50);
+    GPIOB->ODR &= ~(1<<6);      // Set interrupt line low 
+    //printf("Set interrupt line low\r\n");
+    printf("GPIO Interrupt sent to ESP32\n\r");
+}
+
 // Set the simulated value into the sensor and check for anomaly
 void process_sensor_values(bool injectAnomaly) {
     int sensorIndex = 0;
     int anomalyIndex = (injectAnomaly) ? (rand() % MAX_SENSOR) : -1;
     if (injectAnomaly) {
-        printf("\nAnomaly will be on sensor Index: %d\r\n", anomalyIndex);
+        printf("Anomaly will be on sensor Index: %d\r\n", anomalyIndex);
     }
 
     for (int i = 0; i < NUM_GROUPS; i++) {
@@ -169,6 +180,7 @@ void process_sensor_values(bool injectAnomaly) {
             } else {
                 printf(" - out of range\r\n");          // Sensor value out of range
                 enqueue(anomalyIndex);
+                triggerFlag = true;
             }
             add_to_buffer(&sensorBuffers[sensorIndex], value);     // Add sensor value to its circular buffer
             //printf("Added to Sensor %d buffer: %.2f\n\r", sensorIndex, value);
@@ -177,11 +189,16 @@ void process_sensor_values(bool injectAnomaly) {
     }
     
     if (injectAnomaly) {
-        printQueue();                                                               // Print current queue status
-        printf("After printQueue");
-        print_stored_sensor_values(&sensorBuffers[anomalyIndex], anomalyIndex);      // Print anomaly buffer values
+        // printQueue();                                                               // Print current queue status
+        // print_stored_sensor_values(&sensorBuffers[anomalyIndex], anomalyIndex);      // Print anomaly buffer values
+        // printf("\n\r");
     } 
-
+    if (triggerFlag) {
+        sendTrigger();
+        printQueue();
+        printf("\n\r");
+        triggerFlag = false;
+    }
 }
 
 void systick_simulation(void) {

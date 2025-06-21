@@ -1,7 +1,9 @@
 
 #include "spi.h"
-#include "spi_comm.h"
+#include "queue.h"
 #include "systick.h"
+#include "spi_comm.h"
+#include "simulate.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -49,6 +51,46 @@ void prepare_queued_response(bool clean_rx) {
     //printf("Response is ready 1.\r\n");
 }
 
+void printData() {
+    if (isQueueEmpty()) {
+        printf("Queue is empty\n\r");
+        return;
+    }
+
+    int anomalyIndex = dequeue();
+    CircularBuffer* buffer = &sensorBuffers[anomalyIndex];
+
+    printf("Sensor %d buffer: [ ", anomalyIndex);
+
+    if (buffer->count == 0) {
+        // Buffer is empty, print zeros
+        for (int i=0; i < CIRC_BUFFER_SIZE; i++) {
+            if (i == CIRC_BUFFER_SIZE - 1) {
+                printf("0.00 ]");
+            } else {
+                printf("0.00, ");
+            }
+        }
+    } else {
+        // Print stored values
+        for (int i = 0; i < CIRC_BUFFER_SIZE; i++) {
+            if (i == CIRC_BUFFER_SIZE - 1) {
+                printf("%.2f ]", buffer->data[i]);
+            } else {
+                printf("%.2f, ", buffer->data[i]);
+            }
+            // if (buffers[i].count == 0) {
+            //     printf("Buffer %d is empty\r\n", i);
+            //     continue;
+            // }
+            // int value = (buffers[i].head - 1 + CIRC_BUFFER_SIZE) % CIRC_BUFFER_SIZE;
+            // float lastValue = buffers[i].data[lastIndex];
+            // printf("Buffer %d: %.2f\r\n", i, value);
+        }
+    }
+    printf("\n\r");
+}
+
 // Handle the Master data received
 void process_spi_command(void) {
     //printf("Received from Master: %s\r", rx_buffer);
@@ -59,7 +101,7 @@ void process_spi_command(void) {
     else if (strncmp((char*)rx_buffer, "Data Request", strlen("Data Request")) == 0) {
         __attribute__((aligned(4))) float sensor_data[10] = {1.1f, 2.2f, 3.3f, 4.4f, 5.5f, 6.6f, 7.7f, 8.8f, 9.9f, 10.10f};
         queue_response(RESPONSE_BUFFER, sensor_data, 10 * sizeof(float));
-        
+        printData();
     }
     else {
         queue_response(RESPONSE_TEXT, "Unknown command", strlen("Unknown command"));
@@ -130,3 +172,10 @@ void EXTI4_IRQHandler(void) {
         }        
     }
 }
+
+
+Where to pick up:
+    - Print sensor buffer values - done
+    - Send the sensor buffer values to ESP32
+    - Clean the codes
+    - Add documentation

@@ -64,7 +64,7 @@ int main() {
 
     printf("\nSTM32 Sensor Node Start\r\n");                                    
     printf("Demo Message: %s\r\n", demo_get_message());    // Make sure C++ is working
-    printf("\nTesting109\r\n");
+    //printf("\nTesting109\r\n");
 
     srand(time(NULL));
     generate_sensors();             // Create sensors
