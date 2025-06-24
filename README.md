@@ -146,7 +146,8 @@ Upon detecting an anomaly, the master requests the latest sensor readings from t
 │── 📄 README.md  (Documentation)
 ```
 
-
+### 🎬 Demo
+![Demo](./demo.gif)
 
 
 
