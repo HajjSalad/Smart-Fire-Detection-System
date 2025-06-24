@@ -145,7 +145,7 @@ Upon detecting an anomaly, the master requests the latest sensor readings from t
 │   ├── 📄 CMakeLists.txt       (Build system configuration)
 │── 📄 README.md  (Documentation)
 ```
-
+---
 ### 🎬 Demo
 ![Demo](./demo.gif)
 
