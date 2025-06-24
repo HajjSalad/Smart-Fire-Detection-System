@@ -53,7 +53,7 @@ uint32_t dequeue() {
         front = (front + 1) % MAX_SENSOR;
     }
 
-    printf("Dequeued anomaly index: %u\n\r", anomalyIndex);
+    // printf("Dequeued anomaly index: %u\n\r", anomalyIndex);
     return anomalyIndex;   
 }
 

@@ -174,8 +174,13 @@ void request_data(void)
         }
         printf("\n");
         printf("Phase 2 response: ");
-        for (int i = 0; i < 40; i++) {
-            printf("%02X ", rx_phase2[1 + i]);
+        float *float_values = (float*)(rx_phase2 + 1);
+        // for (int i = 0; i < 40; i++) {
+        //     printf("%02X ", rx_phase2[1 + i]);
+        // }
+        for (int i = 0; i < 10; i++) {
+            printf("%.2f", float_values[i]);
+            if (i != 9) printf(", ");
         }
         printf("\n\n");
         publish_sensor_data(rx_phase2 + 1, 40);

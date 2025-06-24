@@ -178,7 +178,7 @@ void process_sensor_values(bool injectAnomaly) {
             if (value >= r.min && value <= r.max) {     // Within range
                 printf(" - within range\r\n");
             } else {
-                printf(" - out of range\r\n");          // Sensor value out of range
+                printf(" - out of range -> ");          // Sensor value out of range
                 enqueue(anomalyIndex);
                 triggerFlag = true;
             }
@@ -187,6 +187,7 @@ void process_sensor_values(bool injectAnomaly) {
             sensorIndex++;
         }
     }
+    printf("\r\n");
     
     if (injectAnomaly) {
         // printQueue();                                                               // Print current queue status

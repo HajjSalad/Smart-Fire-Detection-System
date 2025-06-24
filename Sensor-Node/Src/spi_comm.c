@@ -97,11 +97,28 @@ void process_spi_command(void) {
            
     if (strncmp((char*)rx_buffer, "Are you Alive?", strlen("Are you Alive?")) == 0) {
         queue_response(RESPONSE_TEXT, "I'm Alive", strlen("I'm Alive"));
+        printf("Health status to Master: I'm alive\n\r");
     }
     else if (strncmp((char*)rx_buffer, "Data Request", strlen("Data Request")) == 0) {
-        __attribute__((aligned(4))) float sensor_data[10] = {1.1f, 2.2f, 3.3f, 4.4f, 5.5f, 6.6f, 7.7f, 8.8f, 9.9f, 10.10f};
-        queue_response(RESPONSE_BUFFER, sensor_data, 10 * sizeof(float));
-        printData();
+        if (!isQueueEmpty()) {
+            int anomalyIndex = dequeue();
+            CircularBuffer* buffer = &sensorBuffers[anomalyIndex];
+
+            // Queue the buffer data
+            queue_response(RESPONSE_BUFFER, buffer->data, CIRC_BUFFER_SIZE * sizeof(float));
+
+            printf("Sending buffer from Sensor %d: [ ", anomalyIndex);
+            for (int i = 0; i < CIRC_BUFFER_SIZE; i++) {
+                if (i == CIRC_BUFFER_SIZE - 1) {
+                    printf("%.2f ]\n\r", buffer->data[i]);
+                } else {
+                    printf("%.2f, ", buffer->data[i]);
+                }
+            }
+        } else {
+            queue_response(RESPONSE_TEXT, "No anomaly data", strlen("No anomaly data"));
+            printf("Queue is empty\n\r");
+        }
     }
     else {
         queue_response(RESPONSE_TEXT, "Unknown command", strlen("Unknown command"));
@@ -123,7 +140,7 @@ void SPI1_IRQHandler(void) {
                 rx_buffer[rx_index] = '\0';
                 rx_index = 0;
 
-                //printf("\nMaster command received.\r\n");
+                printf("Master command received: %s\r", rx_buffer);
                 process_spi_command();     // Only queue response, Sent in next SPI transaction
             }
             SPI1->DR = DUMMY_BYTE;         // Respond with dummy
@@ -176,6 +193,7 @@ void EXTI4_IRQHandler(void) {
 
 Where to pick up:
     - Print sensor buffer values - done
-    - Send the sensor buffer values to ESP32
+    - Send the sensor buffer values to ESP32 - done
+    - Check ESP32 and see whether the buffer is being received
     - Clean the codes
     - Add documentation

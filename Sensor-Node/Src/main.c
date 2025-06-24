@@ -52,6 +52,7 @@ void generate_sensors()
         }
         printf(")\r\n");
     }
+    printf("\r\n");
 }
 
 int main() {
