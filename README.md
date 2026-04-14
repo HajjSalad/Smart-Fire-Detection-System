@@ -125,25 +125,67 @@ Upon detecting an anomaly, the master requests the latest sensor readings from t
 ---
 ### 📂 Project Code Structure
 ```
-📁 Smart-Fire-Detection-System/
-│── 📁 stm32_sensor_node/
-│   ├── 📄 main.c               (Entry point of the program)
-│   ├── 📄 factory.cpp / .h     (Abstract Factory pattern implementation)
-│   ├── 📄 sensor.cpp / .h      (Base sensor classes and interfaces)
-│   ├── 📄 wrapper.cpp / .h     (Hardware abstraction layer wrappers)
-│   ├── 📄 simulate.c / .h      (Sensor data simulation)
-│   ├── 📄 spi.c / .h           (SPI & GPIO Interrupt Communication)
-│   ├── 📄 uart.c / .h          (UART Communication)
-│   ├── 📄 systick.c / .h       (Systick Timer)
-│   ├── 📄 Makefile             (Build system configuration)
-│── 📁 esp32_facp_cloud_node/
-│   ├── 📄 main.c               (Entry point of the program, Tasks)
-│   ├── 📄 spi.c / .h           (SPI & GPIO Interrupt Communication)
-│   ├── 📄 uart.c / .h          (UART Communication)
-│   ├── 📄 wifi.c / .h          (WiFi Connectivity)
-│   ├── 📄 cloud.c / .h         (MQTT for AWS Connectivity)
-│   ├── 📄 CMakeLists.txt       (Build system configuration)
-│── 📄 README.md  (Documentation)
+📁 fire-detector/
+│── 📁 Sensor-Node/                          (STM32F446RE firmware)
+│   ├── 📁 Inc/                              (Header files)
+│   │   ├── 📁 comm/                         (Communication drivers)
+│   │   ├── 📁 sensors/                      (Sensor interfaces)
+│   │   ├── 📁 tasks/                        (FreeRTOS task declarations)
+│   │   ├── 📁 utils/                        (Utility headers)
+│   │   ├── 📁 CMSIS/                        (ARM CMSIS headers)
+│   │   └── 📁 STM32F4xx/                    (STM32 HAL headers)
+│   ├── 📁 Src/                              (Source files)
+│   │   ├── 📄 main.c                        (Entry point, FreeRTOS scheduler init)
+│   │   ├── 📄 syscalls.c                    (System call stubs)
+│   │   ├── 📁 comm/                         (Communication driver implementations)
+│   │   │   ├── 📄 i2c1_driver.c
+│   │   │   ├── 📄 spi1_driver.c
+│   │   │   ├── 📄 uart1_driver.c
+│   │   │   └── 📄 uart2_driver.c
+│   │   ├── 📁 sensors/                      (Sensor driver implementations)
+│   │   │   ├── 📄 bme680_enviro_sensor.c
+│   │   │   ├── 📄 tmp102_temp_sensor.c
+│   │   │   ├── 📄 button_flame_sensor.c
+│   │   │   ├── 📄 simulate_smoke_sensor.c
+│   │   │   └── 📄 simulate_gas_sensor.c
+│   │   ├── 📁 tasks/                        (FreeRTOS task implementations)
+│   │   │   ├── 📄 task_1_sensor_read.c
+│   │   │   ├── 📄 task_2_anomaly_detect.c
+│   │   │   ├── 📄 task_3_modbus_slave.c
+│   │   │   └── 📄 task_4_system_logger.c
+│   │   └── 📁 utils/                        (Utility implementations)
+│   │       ├── 📄 crc_16.c
+│   │       └── 📄 demo.cpp
+│   ├── 📁 FreeRTOS/                         (FreeRTOS kernel source)
+│   ├── 📁 Startup/                          (MCU startup assembly)
+│   ├── 📁 Build/                            (Compiled output)
+│   ├── 📄 STM32F446RETX_FLASH.ld            (Linker script — flash)
+│   ├── 📄 STM32F446RETX_RAM.ld              (Linker script — RAM)
+│   ├── 📄 Makefile                          (Build system configuration)
+│   └── 📄 Doxyfile                          (Doxygen config)
+│
+│
+│
+│── 📁 Control-Panel/                        (ESP32 FACP + cloud node)
+│   ├── 📁 main/                             (Application entry point)
+│   ├── 📁 components/                       (ESP-IDF custom components)
+│   │   ├── 📁 modbus/                       (MODBUS master implementation)
+│   │   │   ├── 📁 include/
+│   │   │   ├── 📄 modbus_master.c
+│   │   │   ├── 📄 crc_16.c
+│   │   │   └── 📄 CMakeLists.txt
+│   │   └── 📁 uart/                         (UART driver component)
+│   │       ├── 📁 include/
+│   │       ├── 📄 uart2_driver.c
+│   │       └── 📄 CMakeLists.txt
+│   ├── 📄 CMakeLists.txt                    (Top-level ESP-IDF build config)
+│   ├── 📄 sdkconfig                         (ESP-IDF SDK configuration)
+│   ├── 📁 build/                            (Compiled output)
+│   └── 📄 Doxyfile                          (Doxygen config)
+│── 📄 README.md                             (Project documentation)
+│── 📄 LICENSE
+│── 📄 gdb_commands.gdb                      (GDB debug helper script)
+└── 📄 demo.gif                              (Demo animation)
 ```
 ---
 ### 🎬 Demo

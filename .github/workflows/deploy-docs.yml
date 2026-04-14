@@ -1,4 +1,4 @@
-name: Deploy Doxygen Docs to GitHub Pages
+name: Deploy Doxygen Documentation to GitHub Pages
 
 on:
   push:
