@@ -1,74 +1,170 @@
+# ========================================================
+# Makefile for STM32 Sensor Node
+# ========================================================
 
-TARGET = stm32_sensor_node
-MCU = cortex-m4
-CPU = -mcpu=$(MCU) -mthumb -mfloat-abi=soft -mfpu=fpv4-sp-d16
+# Target binary name
+TARGET = STM32_Sensor_Node
 
-CFLAGS = $(CPU) -Wall -g -O2 -ffunction-sections -fdata-sections \
-         -I/opt/homebrew/arm-none-eabi/arm-none-eabi/include \
-         -I/Users/abdirahmanhajj/STM32_Workspace/STM32Cube_FW_F4/Drivers/CMSIS/Include \
-         -I/Users/abdirahmanhajj/STM32_Workspace/STM32Cube_FW_F4/Drivers/CMSIS/Device/ST/STM32F4xx/Include
+# Build directory
+BUILD_DIR = Build
 
-CXXFLAGS = $(CFLAGS) -fno-rtti -fno-exceptions  # No runtime type info (RTTI) or exceptions for embedded
+# Source files directory
+C_SOURCES = $(wildcard Src/*.c) \
+			$(wildcard Src/comm/*.c) \
+			$(wildcard Src/tasks/*.c) \
+            $(wildcard Src/utils/*.c) \
+			$(wildcard Src/sensors/*.c) \
+            $(wildcard FreeRTOS/Source/*.c) \
+            $(wildcard FreeRTOS/Source/portable/GCC/ARM_CM4F/*.c) \
+            FreeRTOS/Source/portable/MemMang/heap_4.c
 
-LDFLAGS = -T STM32F446RETX_FLASH.ld --specs=nosys.specs -Wl,--gc-sections -lstdc++
+# C++ source files
+CXX_SOURCES = $(wildcard Src/*.cpp) \
+              $(wildcard Src/core/*.cpp) \
+			  $(wildcard Src/utils/*.cpp)
 
-# Directories 
-INCDIR = Inc \
-         /Users/abdirahmanhajj/STM32_Workspace/STM32Cube_FW_F4/Drivers/CMSIS/Include \
-         /Users/abdirahmanhajj/STM32_Workspace/STM32Cube_FW_F4/Drivers/CMSIS/Device/ST/STM32F4xx
-SRCDIR = Src
-OBJDIR = Build
+# ASM sources
+ASM_SOURCES = Startup/startup_stm32f446retx.s
+
+# Options for float-abi:
+# -mfloat-abi=soft     : No FPU, software emulation (slower, smaller code, more compatible)
+# -mfloat-abi=softfp   : FPU used but software calling convention (compatible with soft)
+# -mfloat-abi=hard     : FPU used with hardware calling convention (faster, larger code, less compatible)
+# Third option used
+
+# MCU definition
+CPU = -mcpu=cortex-m4
+FPU = -mfpu=fpv4-sp-d16
+FLOAT_ABI = -mfloat-abi=hard
+MCU = $(CPU) -mthumb $(FPU) $(FLOAT_ABI)
+
+# C includes
+C_INCLUDES = -IInc \
+             -IInc/comm \
+             -IInc/core \
+             -IInc/tasks \
+			 -IInc/utils \
+		     -IInc/sensors \
+             -IInc/CMSIS/Core/Include \
+             -IInc/STM32F4xx/Include \
+             -IFreeRTOS/Source/include \
+             -IFreeRTOS/Source/portable/GCC/ARM_CM4F \
+             -IFreeRTOS
+
+# C defines
+C_DEFS = -DSTM32F446xx \
+         -DUSE_FULL_ASSERT \
+
+# C flags
+CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) -O2 -g3 -Wall -fdata-sections -ffunction-sections
+
+CXXFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) -O2 -g3 -Wall -fdata-sections -ffunction-sections \
+           -fno-exceptions -fno-rtti -fno-use-cxa-atexit -fno-threadsafe-statics
+
+# Linker script
+LDSCRIPT = STM32F446RETX_FLASH.ld
+
+# Libraries
+LIBS = -lc -lm -lnosys -lstdc++
+LIBDIR =
+
+# Linker flags
+LDFLAGS = $(MCU) -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -specs=nano.specs \
+          -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections \
+          -Wl,--no-warn-mismatch -u _printf_float
 
 # Toolchain
-CC = arm-none-eabi-gcc
-CXX = arm-none-eabi-g++
-AS = arm-none-eabi-as
-OBJCOPY = arm-none-eabi-objcopy
-SIZE = arm-none-eabi-size
-GDB = arm-none-eabi-gdb
-OPENOCD = openocd
+PREFIX = arm-none-eabi-
+CC = $(PREFIX)gcc
+CXX = $(PREFIX)g++
+AS = $(PREFIX)gcc -x assembler-with-cpp
+CP = $(PREFIX)objcopy
+SZ = $(PREFIX)size
 
-# Source files
-CSRCS = $(wildcard $(SRCDIR)/*.c)
-CPPSRCS = $(wildcard $(SRCDIR)/*.cpp)
-ASRCS = startup/startup_stm32f446retx.s
+# Object files (all go into Build/)
+OBJECTS = $(addprefix $(BUILD_DIR)/, $(notdir $(C_SOURCES:.c=.o)))
+OBJECTS += $(addprefix $(BUILD_DIR)/, $(notdir $(CXX_SOURCES:.cpp=.o)))
+OBJECTS += $(addprefix $(BUILD_DIR)/, $(notdir $(ASM_SOURCES:.s=.o)))
 
-OBJS = $(patsubst $(SRCDIR)/%.c, $(OBJDIR)/%.o, $(CSRCS)) \
-       $(patsubst $(SRCDIR)/%.cpp, $(OBJDIR)/%.o, $(CPPSRCS)) \
-       $(patsubst startup/%.s, $(OBJDIR)/%.o, $(ASRCS))
+all: $(BUILD_DIR)/$(TARGET).elf
+	@echo "Build complete."
+	$(SZ) $(BUILD_DIR)/$(TARGET).elf
 
-# Rules
-all: $(TARGET).elf $(TARGET).bin
+# Create Build directory
+$(BUILD_DIR):
+	mkdir -p $@
 
-$(OBJDIR):
-	mkdir -p $(OBJDIR)
+# Compile C sources
+$(BUILD_DIR)/%.o: Src/%.c | $(BUILD_DIR)
+	@echo "Compiling $< ..."
+	$(CC) $(CFLAGS) -c $< -o $@
 
-# Compile C files
-$(OBJDIR)/%.o: $(SRCDIR)/%.c | $(OBJDIR)
-	$(CC) $(CFLAGS) $(foreach d, $(INCDIR), -I$d) -c $< -o $@
+# Compile C++ sources - Src/
+$(BUILD_DIR)/%.o: Src/%.cpp | $(BUILD_DIR)
+	@echo "Compiling (C++) $< ..."
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-# Compile C++ files
-$(OBJDIR)/%.o: $(SRCDIR)/%.cpp | $(OBJDIR)
-	$(CXX) $(CXXFLAGS) $(foreach d, $(INCDIR), -I$d) -c $< -o $@
+# Compile C sources - Src/tasks/
+$(BUILD_DIR)/%.o: Src/tasks/%.c | $(BUILD_DIR)
+	@echo "Compiling $< ..."
+	$(CC) $(CFLAGS) -c $< -o $@
 
-# Assemble startup file
-$(OBJDIR)/%.o: startup/%.s | $(OBJDIR)
-	$(AS) $< -o $@
+# Compile C sources - Src/comm/
+$(BUILD_DIR)/%.o: Src/comm/%.c | $(BUILD_DIR)
+	@echo "Compiling $< ..."
+	$(CC) $(CFLAGS) -c $< -o $@
 
-# Link everything with the C++ compiler
-$(TARGET).elf: $(OBJS)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $^ -o $@
-	$(SIZE) $@
+# Compile C sources - Src/sensors/
+$(BUILD_DIR)/%.o: Src/sensors/%.c | $(BUILD_DIR)
+	@echo "Compiling $< ..."
+	$(CC) $(CFLAGS) -c $< -o $@
 
-# Convert ELF to binary
-$(TARGET).bin: $(TARGET).elf
-	$(OBJCOPY) -O binary $< $@
+# Compile C sources - Src/utils/
+$(BUILD_DIR)/%.o: Src/utils/%.c | $(BUILD_DIR)
+	@echo "Compiling $< ..."
+	$(CC) $(CFLAGS) -c $< -o $@
 
-flash: $(TARGET).bin
-	$(OPENOCD) -f interface/stlink.cfg -f target/stm32f4x.cfg -c "program $(TARGET).bin verify reset exit"
+# Compile C++ sources - Src/utils/
+$(BUILD_DIR)/%.o: Src/utils/%.cpp | $(BUILD_DIR)
+	@echo "Compiling (C++) $< ..."
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-debug: $(TARGET).elf
-	$(OPENOCD) -f interface/stlink.cfg -f target/stm32f4x.cfg -c "init; reset halt"
+# Compile FreeRTOS sources
+$(BUILD_DIR)/%.o: FreeRTOS/Source/%.c | $(BUILD_DIR)
+	@echo "Compiling $< ..."
+	$(CC) $(CFLAGS) -c $< -o $@
 
+# Compile FreeRTOS port
+$(BUILD_DIR)/%.o: FreeRTOS/Source/portable/GCC/ARM_CM4F/%.c | $(BUILD_DIR)
+	@echo "Compiling $< ..."
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Compile FreeRTOS heap
+$(BUILD_DIR)/%.o: FreeRTOS/Source/portable/MemMang/%.c | $(BUILD_DIR)
+	@echo "Compiling $< ..."
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Assemble startup
+$(BUILD_DIR)/%.o: Startup/%.s | $(BUILD_DIR)
+	@echo "Assembling $< ..."
+	$(AS) $(CFLAGS) -c $< -o $@
+
+# Link to create ELF
+$(BUILD_DIR)/$(TARGET).elf: $(OBJECTS)
+	@echo "Linking $(TARGET).elf ..."
+	$(CXX) $(OBJECTS) $(LDFLAGS) -o $@
+
+# Clean up build files
 clean:
-	rm -rf $(OBJDIR) $(TARGET).elf $(TARGET).bin
+	@echo "Cleaning build files..."
+	rm -rf $(BUILD_DIR)
+	@echo "Clean complete"
+
+# Flash target using OpenOCD
+flash: all
+	@echo "Flashing $(TARGET).elf to STM32..."
+	openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c "program $(BUILD_DIR)/$(TARGET).elf verify reset exit"
+
+erase:
+	@echo "Erasing STM32 flash memory..."
+	openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c "init; halt; stm32f4x mass_erase 0; exit"

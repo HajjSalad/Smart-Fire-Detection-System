@@ -1,138 +1,121 @@
+/**
+ * @file  main.c
+ * @brief Main entry point for the STM32 Sensor Node application.
+ * 
+ * Initializes peripherals, creates FreeRTOS resources (mutexes, queues), 
+ * spawns all application tasks, and starts the scheduler.
+*/
 
-#include "uart.h"
-#include "demo.h"
-#include "spi.h"
-#include "spi_comm.h"
-#include "systick.h"
-#include "simulate.h"
-#include "wrapper.h"
+#include <stdint.h>
 
-#include <time.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdbool.h>
 #include "stm32f446xx.h"
 
-// Get started:
-// 1. Indicate desired # of sensor groups (NUM_GROUPS in simulate.h)
-// 2. Add to create desired sensor group to group[] in main.c->generate_sensors()
-// Done!
+#include "FreeRTOS.h"
+#include "task.h"
+#include "queue.h"
+#include "semphr.h"
 
-void generate_sensors() 
+#include "tasks.h"
+#include "sensor_drivers.h"
+#include "i2c_driver.h"
+#include "uart_driver.h"
+#include "shared_resources.h"
+
+// Local function prototypes
+static void check_reset_cause(void);
+
+QueueHandle_t        xSensorQueue       = NULL;      
+QueueHandle_t        xLogQueue          = NULL;
+SemaphoreHandle_t    xSensorMutex       = NULL;
+
+SensorData_t         shared_sensor_data = {0};
+
+/**
+ * @brief FreeRTOS stack overflow hook.
+ * 
+ * Called automatically when stack overflow is detected. 
+ * Logs the offending task name and halts the system.
+*/
+void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName) {
+    (void)xTask;                // Suppress unused parameter warning
+    uart2_write('!');           // Indicate stack overflow error
+    while(1) {}
+}
+
+/**
+ * @brief Application entry point.
+ * 
+ * Initializes UART peripherals, creates FreeRTOS synchronization
+ * primitives and tasks, then starts the scheduler.
+*/
+int main(void) 
 {
-    // Create sensor groups
-    group[0] = create_sensor_group("Fire");
-    group[1] = create_sensor_group("Environment");
-    group[2] = create_sensor_group("Smart");
-   
-    bool group_creation_failed = false;
-    for (int i = 0; i < NUM_GROUPS; i++) {
-        if (!group[i]) {
-            group_creation_failed = true;
-            break;
-        }
-    }
-    if (group_creation_failed) {
-        printf("Failed to create sensor group\r\n");
-        return;
-    }
+    BaseType_t xRet = pdFALSE;
 
-    // Check the number of sensors for each group
-    for (int j = 0; j < NUM_GROUPS; j++){
-        int count = get_sensor_count(group[j]);
-        printf("Sensors for group[%d]: %d sensors(", j, count);
+    uart2_init();               // Initialize UART2 for logging
+    uart1_init();               // Initialize UART1 for ESP32 communication
+    i2c1_init();                //
+    tmp102_init();
 
-        for (int i = 0; i < count; i++) {
-            const char* name = get_sensor_name(group[j], i);
-            printf("%s", name);
-            if (i < count - 1) {
-                printf(", ");
-            }
-        }
-        printf(")\r\n");
-    }
-    printf("\r\n");
+    // Initialize sensor drivers
+    // flame_sensor_init();
+    
+
+    check_reset_cause();        // Log the cause of the last reset
+
+    LOG("*** STM32 Sensor Node Starting ***");
+
+    xSensorMutex = xSemaphoreCreateMutex();
+    configASSERT(xSensorMutex != NULL);
+
+    xSensorQueue = xQueueCreate(SENSOR_QUEUE_DEPTH, sizeof(SensorData_t));
+    configASSERT(xSensorQueue != NULL);
+
+    xLogQueue = xQueueCreate(LOG_QUEUE_DEPTH, LOG_MSG_MAX_LEN);
+    configASSERT(xLogQueue != NULL);
+
+    /**
+     * Priorities  (in FreeRTOS, 0 = lowest priority)
+     * MAX_PRIORITIES = 16
+     * 
+     * Priority 6  → Sensor read
+     * Priority 5  → Anomaly detect
+     * Priority 4  → Modbus Slave
+     * Priority 3  → Logger
+     * Priority 0  → Idle task
+    */
+
+    // Create task
+    xRet = xTaskCreate(vTaskSensorRead,    "SensorRead",    512, NULL, 6, NULL);
+    configASSERT(xRet == pdPASS);
+    xRet = xTaskCreate(vTaskAnomalyDetect, "AnomalyDetect", 512, NULL, 5, NULL);
+    configASSERT(xRet == pdPASS);
+    xRet = xTaskCreate(vTaskModbusSlave,    "ModbusSlave",  512, NULL, 4, NULL);
+    configASSERT(xRet == pdPASS);
+    xRet = xTaskCreate(vTaskLogger,         "Logger",       512, NULL, 3, NULL);
+    configASSERT(xRet == pdPASS);
+
+    LOG("Tasks created. Free heap: %u bytes", xPortGetFreeHeapSize());
+    LOG("Starting scheduler...");
+
+    vTaskStartScheduler();  
+
+    // Should never reach here - halt if scheduler exits
+    LOG("Scheduler exited unexpectedly!");
+    while (1) {}
 }
 
-int main() {
-    uart2_rxtx_init();
-    demo_init();   
-    spi1_slave_init();
-    interrupt_line_init();
-    systick_init();
-    init_all_buffers();
+/**
+ * @brief Check reset cause and log it over UART.
+ * Must be called before any other initialization to ensure accurate logging of reset causes.
+*/
+static void check_reset_cause(void) 
+{
+    uint32_t cause = RCC->CSR;
+    RCC->CSR |= RCC_CSR_RMVF;           // Clear reset flags
 
-    printf("\nSTM32 Sensor Node Start\r\n");                                    
-    printf("Demo Message: %s\r\n", demo_get_message());    // Make sure C++ is working
-    //printf("\nTesting109\r\n");
-
-    srand(time(NULL));
-    generate_sensors();             // Create sensors
-    start_simulation();             // Start simulation
-
-    while(1) 
-    {
-        __WFI();
-    }
-    return 0;
+    if (cause & RCC_CSR_IWDGRSTF) { LOG("Reset: Watchdog"); }
+    if (cause & RCC_CSR_SFTRSTF)  { LOG("Reset: Software"); }
+    if (cause & RCC_CSR_PORRSTF)  { LOG("Reset: Power-On"); }
+    if (cause & RCC_CSR_PINRSTF)  { LOG("Reset: External Pin"); }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// void trigger_anomaly_interrupt(void) {
-//     GPIOB->ODR |= (1 << 6);
-//     for (volatile int d = 0; d < 1000; d++);
-//     GPIOB->ODR &= ~(1 << 6);
-// }
-
-// void test_anomaly_trigger(void) {
-//     printf("Set interrupt line high\r\n");
-//     GPIOB->ODR |= (1<<6);       // Set interrupt line high
-//
-//     // Wait until ESP32 triggers a SPI read
-//     while (!transfer_complete);
-//
-//     // Reset flag for next round
-//     transfer_complete = 0;
-//
-//     printf("Received from Master: %s\r\n", rx_buffer);
-//     if (strcmp((char*)rx_buffer, "Data Request") == 0) {
-//         __attribute__((aligned(4))) float sensor_data[10] = {1.1f, 2.2f, 3.3f, 4.4f, 5.5f, 6.6f, 7.7f, 8.8f, 9.9f, 10.10f};
-//         prepare_spi_response(RESPONSE_BUFFER, sensor_data, 10, true);
-//     } else {
-//         prepare_spi_response(RESPONSE_TEXT, "Unknown command", 0, true);
-//     }
-//
-//     //systickDelayMs(50);
-//     GPIOB->ODR &= ~(1<<6);      // Set interrupt line low
-//    
-//     printf("Test completed. Check ESP32 output.\r\n");
-// }

@@ -12,6 +12,7 @@
 /Debug/
 /STM32_Side/Drivers/
 /STM32_Side/Debug
+/build
 
 # Ignore logs
 *.log
