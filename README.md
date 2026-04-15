@@ -17,15 +17,13 @@ The FreeRTOS-based sensor node continuously samples environmental telemetry acro
 | PMSA003I | PM2.5 Particulate Matter | I2C1 | Simulated |
 | Gas Sensor | CO2 ppm | — | Simulated |
 | Flame Sensor | Flame detected / not detected | GPIO | Real hardware |
-
-Simulated sensors return realistic randomized values within calibrated physical ranges. Driver interfaces are production-ready — replacing simulated implementations with real hardware requires only swapping the driver body, the interface remains unchanged.
 #### 🧵 Task Model
 | Task | Priority | Responsibility |
 |---|---|---|
-| `vTaskSensorRead` | 4 | Samples all sensors, writes to `shared_sensor_data`, pushes to `xSensorDataQueue` |
-| `vTaskAnomalyDetect` | 3 | Blocks on `xSensorDataQueue`, checks readings against thresholds, raises alert flag |
-| `vTaskModbusSlave` | 3 | Polls UART ring buffer, parses MODBUS frames, reads `shared_sensor_data`, sends response |
-| `vTaskSystemLogger` | 1 | Sole consumer of `xLogQueue` — drains and prints all log messages to UART terminal |
+| `vTaskSensorRead` | 6 | Samples all sensors, writes to `shared_sensor_data`, pushes to `xSensorDataQueue` |
+| `vTaskAnomalyDetect` | 5 | Blocks on `xSensorDataQueue`, checks readings against thresholds, raises alert flag |
+| `vTaskModbusSlave` | 4 | Polls UART ring buffer, parses MODBUS frames, reads `shared_sensor_data`, sends response |
+| `vTaskSystemLogger` | 3 | Sole consumer of `xLogQueue` - drains and prints all log messages to UART terminal |
 ### 🔗 FreeRTOS Resources
 | Resource | Type | Purpose |
 |---|---|---|
@@ -34,9 +32,9 @@ Simulated sensors return realistic randomized values within calibrated physical 
 | `xLogQueue` | Queue | Passes log strings from all tasks → `vTaskSystemLogger` |
 ### 🔀 Data Flow
 ```
-┌──────────────────┐
-│ vTaskSensorRead  │──── writes ────→ shared_sensor_data (mutex) ←── reads ── vTaskModbusSlave
-└────────┬─────────┘
+┌──────────────────┐                                               ┌──────────────────┐
+│ vTaskSensorRead  │─── writes ───→ shared_sensor_data ←── reads ──  vTaskModbusSlave
+└────────┬─────────┘                                               └──────────────────┘
          │ pushes SensorData_t
          ▼
 ┌────────────────────┐
@@ -45,13 +43,13 @@ Simulated sensors return realistic randomized values within calibrated physical 
          │ blocks on
          ▼
 ┌──────────────────────┐
-│ vTaskAnomalyDetect   │──── raises ────→ anomaly_flag
+│ vTaskAnomalyDetect   │─── raises ──→ anomaly_flag
 └──────────────────────┘
 
 All tasks ──→ xLogQueue ──→ vTaskSystemLogger ──→ UART terminal
 ```
 #### 📡 Peripheral Drivers
-**SPI1 — BME680**
+**SPI1 — BME680**   
 Bare-metal SPI1 driver with register-level reads. Full duplex master, Mode 0 (CPOL=0, CPHA=0), 1MHz clock. CS manually controlled via PC7 GPIO. Burst read using BME680 auto-increment register pointer.
 ```
 PB3 — SCK  (AF5)
@@ -59,13 +57,13 @@ PA7 — MOSI (AF5)
 PA6 — MISO (AF5)
 PC7 — CS   (GPIO output, active low)
 ```
-**I2C1 — PMSA003I**
+**I2C1 — PMSA003I**   
 Bare-metal I2C1 driver at 100kHz standard mode with 16MHz APB1 clock. Combined master transmitter / master receiver transaction — write register address, repeated start, read response bytes.
 ```
 PB6 — SCL (AF4)
 PB7 — SDA (AF4)
 ```
-**UART1 — MODBUS**
+**UART1 — MODBUS**   
 Bare-metal UART1 driver at 115200 baud. ISR-driven ring buffer — ISR owns the head, `vTaskModbusSlave` owns the tail. Frame boundary detected via 3.5 character silence timeout (~2ms at 115200 baud).
 ```
 PA9  — TX (AF7)
