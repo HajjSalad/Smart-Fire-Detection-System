@@ -4,7 +4,7 @@ STM32 sensor node deployed across zones, continuously sample environmental telem
 
 The project is organized into four components:
 - 🟠 **STM32 Sensor Node** - environmental sensing, anomaly detection, and MODBUS slave communication
-- 🔵 **MODBUS RTU** - industrial communication protocol stack implemented between sensor nodes and control panel
+- 🔵 **MODBUS RTU** - industrial communication protocol implemented between sensor nodes and control panel
 - 🔴 **ESP32 Fire Alarm Control Panel** - MODBUS master polling, and cloud gateway
 - 🟢 **Sensor Node PCB Design** - KiCad schematic for a custom sensor node PCB with v1/v2 revision roadmap
 ---
