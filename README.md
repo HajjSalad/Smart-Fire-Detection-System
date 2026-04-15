@@ -4,15 +4,9 @@ STM32 sensor node deployed across zones, continuously sample environmental telem
 
 The project is organized into four components:
 - 🟠 **STM32 Sensor Node** - environmental sensing, anomaly detection, and MODBUS slave communication
-- 🔵 **MODBUS RTU** - industrial communication protocol stack implemented from scratch between sensor nodes and control panel
+- 🔵 **MODBUS RTU** - industrial communication protocol stack implemented between sensor nodes and control panel
 - 🔴 **ESP32 Fire Alarm Control Panel** - MODBUS master polling, and cloud gateway
-- 🟢 **Sensor Node PCB Design** - KiCad schematic for a custom sensor node PCB with a clear v1/v2 revision roadmap.  
-| | Component | Description |
-|---|---|---|
-| 🟠 | **STM32 Sensor Node** | Environmental sensing, anomaly detection, and MODBUS slave communication |
-| 🔵 | **MODBUS RTU** | Industrial protocol stack implemented from scratch over RS-485 |
-| 🔴 | **ESP32 Fire Alarm Control Panel** | MODBUS master polling, fault detection, and cloud gateway |
-| 🟢 | **Sensor Node PCB Design** | KiCad schematic with v1 prototype and v2 bare-IC revision roadmap |
+- 🟢 **Sensor Node PCB Design** - KiCad schematic for a custom sensor node PCB with v1/v2 revision roadmap
 ---
 ### 🟠 STM32 Sensor Node
 The FreeRTOS-based sensor node continuously samples environmental telemetry across multiple sensor interfaces, performs on-device anomaly detection, and responds to MODBUS RTU polling requests from the ESP32 Fire Alarm Control Panel over RS-485.
