@@ -1,127 +1,76 @@
-## 🚨 Smart Fire Detection System
-An IoT-enabled fire safety solution featuring:
-- **STM32-based Sensor Nodes** for real-time monitoring of fire/environmental parameters
-- **ESP32 Fire Alarm Control Panel** serving as both gateway and cloud interface
-- **Modular Architecture** using C++ Abstract Factory Pattern for flexible sensor management
-- **Edge-to-Cloud Integration** with AWS IoT for remote monitoring and alerts
+## 🚨 Distributed Fire Safety System
+Commercial and industrial fire safety systems require continuous, reliable environmental monitoring across distributed building zones - detecting early signs of fire through temperature, smoke, gas, and flame signatures before conditions become critical. This project implements that class of system as a distributed embedded architecture, following the sensor node and central controller pattern used in products by Honeywell, Siemens, and Bosch.
+STM32 sensor node deployed across zones, continuously sample environmental telemetry and report to a central ESP32 Fire Alarm Control Panel (FACP) via MODBUS RTU over RS-485. The FACP aggregates data from the node for remote monitoring and alerting.
+
+The project is organized into four components:
+- STM32 Sensor Node - environmental sensing, anomaly detection, and MODBUS slave communication
+- MODBUS RTU — industrial communication protocol stack implemented from scratch between sensor nodes and control panel
+- ESP32 Fire Alarm Control Panel — MODBUS master polling, and cloud gateway
+- Sensor Node PCB Design — KiCad schematic for a custom sensor node PCB with a clear v1/v2 revision roadmap
 ---
-### 📌 Project Overview
-- **STM32 Sensor Node** continuously monitor all sensors and communicates with the **ESP32 FACP** via **SPI**.
-- **FACP conducts heartbeat checks** - pings the Sensor Node, receiving acknowledgments in normal operation.
-- On anomaly, **Sensor Node raises an interrupt**, prompting the FACP to **request detailed sensor readings**.
-- **Cloud reporting**: FACP transmits health metrics and emergency events via **MQTT (AWS IoT Core)**.
----
-### 🔧 Key Features
-✅ **Modular & Scalable Design**  
-&nbsp;&nbsp;&nbsp;• **Abstract Factory Pattern** in C++ for dynamic sensor management.  
-&nbsp;&nbsp;&nbsp;• **Plug-and-play expandability**: Add more Sensor Nodes to the FACP for larger deployments.  
+### 🧪 STM32 Sensor Node
+The FreeRTOS-based sensor node continuously samples environmental telemetry across multiple sensor interfaces, performs on-device anomaly detection, and responds to MODBUS RTU polling requests from the ESP32 Fire Alarm Control Panel over RS-485.
+#### 🔬 Sensor Stack
+| Sensor | Measurement | Interface | Status |
+|---|---|---|---|
+| BME680 | Temperature, Humidity, Pressure, VOC | SPI1 | Real hardware |
+| PMSA003I | PM2.5 Particulate Matter | I2C1 | Simulated |
+| Gas Sensor | CO2 ppm | — | Simulated |
+| Flame Sensor | Flame detected / not detected | GPIO | Real hardware |
 
-✅ **Multi-Sensor Monitoring (Sensor Node STM32)** (Notes on [Notion](https://hajjsalad.notion.site/STM32-Slave-Notes-202a741b5aab803dbfbcdb8398551fd2))           
-&nbsp;&nbsp;&nbsp;The sensor node has 3 groups of sensors:  
-&nbsp;&nbsp;&nbsp;🔥 **Fire Detection**: Temperature, Smoke, Gas, Flame sensors    
-&nbsp;&nbsp;&nbsp;💧 **Environmental**: Humidity, VOC sensors  
-&nbsp;&nbsp;&nbsp;♨️ **Smart Sensing**: Ambient Light, Thermal IR sensors    
-&nbsp;&nbsp;&nbsp;*(Supports up to 8 sensors per node with configurable thresholds)*   
-
-✅ **Fire Alarm Control Panel Node (ESP32)** ([Notes on Notion](https://hajjsalad.notion.site/ESP32-Master-Notes-202a741b5aab80f1bd4bc3d5a1b6f6fd)) ([Doxygen Documentation](https://hajjsalad.github.io/Smart-Fire-Detection-System/esp32/))        
-&nbsp;&nbsp;&nbsp;• **Active Monitoring**: Periodically checks sensor node health via SPI.  
-&nbsp;&nbsp;&nbsp;• **Event-Driven Response**: Instantly reacts to interrupt-based anomaly alerts from sensor nodes.  
-&nbsp;&nbsp;&nbsp;• **Scalable Architecture**: Supports daisy-chaining multiple sensor nodes for large-scale deployments.  
-
-✅ **Robust Communication Stack**  
-&nbsp;&nbsp;🔹 **UART Debugging**:  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Serial logs for sensor status, diagnostics, and development.  
-&nbsp;&nbsp;🔹 **Hardware Interrupt Line**:  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Low-latency Sensor Node to FACP anomaly alerts (Node → FACP)  
-&nbsp;&nbsp;🔹 **SPI**:  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Heartbeat checks (FACP → Node → FACP)  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• On-demand sensor data transmission (Node → FACP)
-
-✅ **Edge Processing**: Anomalies are identified at the sensor node level.   
-✅ **Cloud Integration**: Lightweight AWS IoT Core messaging for live sensor status and emergency alerts.    
-
-
----
-### 🧱 **Modular & Scalable Sensor Creation with Abstract Factory Pattern**
-To support scalable deployments and dynamic sensor configuration, we use the Abstract Factory Pattern in C++. This allows the system to flexibly create related groups of sensors without hardcoding specific sensor types into the logic.
-
-🧩 **Factory Structure**
+Simulated sensors return realistic randomized values within calibrated physical ranges. Driver interfaces are production-ready — replacing simulated implementations with real hardware requires only swapping the driver body, the interface remains unchanged.
+#### 🧵 Task Model
+| Task | Priority | Responsibility |
+|---|---|---|
+| `vTaskSensorRead` | 4 | Samples all sensors, writes to `shared_sensor_data`, pushes to `xSensorDataQueue` |
+| `vTaskAnomalyDetect` | 3 | Blocks on `xSensorDataQueue`, checks readings against thresholds, raises alert flag |
+| `vTaskModbusSlave` | 3 | Polls UART ring buffer, parses MODBUS frames, reads `shared_sensor_data`, sends response |
+| `vTaskSystemLogger` | 1 | Sole consumer of `xLogQueue` — drains and prints all log messages to UART terminal |
+### 🔗 FreeRTOS Resources
+| Resource | Type | Purpose |
+|---|---|---|
+| `xSensorDataMutex` | Mutex | Guards `shared_sensor_data` between `vTaskSensorRead` and `vTaskModbusSlave` |
+| `xSensorDataQueue` | Queue | Passes `SensorData_t` from `vTaskSensorRead` → `vTaskAnomalyDetect` |
+| `xLogQueue` | Queue | Passes log strings from all tasks → `vTaskSystemLogger` |
+### 🔀 Data Flow
 ```
-                        ┌────────────────────┐  
-                        │    SensorFactory   │ → Abstract base class  
-                        └────────────────────┘  
-                         ▲        ▲        ▲  
-       ┌─────────────────┘        │        └─────────────────┐  
-       ▼                          ▼                          ▼  
-┌─────────────────┐       ┌────────────────────┐       ┌──────────────────┐  
- FireSensorFactory         EnvironSensorFactory         SmartSensorFactory   
-└─────────────────┘       └────────────────────┘       └──────────────────┘
-```
-Each concrete factory creates a specific family of sensors:  
-🔥 FireSensorFactory → Temp, Smoke, Gas, Flame Sensors  
-🌿 EnvironSensorFactory → Humidity, VOC Sensors  
-💡 SmartSensorFactory → Ambient Light, Thermal IR Sensors  
+┌──────────────────┐
+│ vTaskSensorRead  │──── writes ────→ shared_sensor_data (mutex) ←── reads ── vTaskModbusSlave
+└────────┬─────────┘
+         │ pushes SensorData_t
+         ▼
+┌────────────────────┐
+│ xSensorDataQueue   │
+└────────┬───────────┘
+         │ blocks on
+         ▼
+┌──────────────────────┐
+│ vTaskAnomalyDetect   │──── raises ────→ anomaly_flag
+└──────────────────────┘
 
----
-### 📡 **Two-Phase SPI Command-Response Protocol**  
-This SPI communication protocol uses a two-phase approach to allow the slave device sufficient time to process incoming commands and prepare a response:  
-&nbsp;&nbsp;🔁 **Phase 1: Command Transmission**  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• **Master (ESP32)** initiates communication by sending a command.    
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• **Slave (STM32)** receives the command and replies with dummy bytes.   
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• The slave parses the command and prepares the appropriate response for the next phase.   
-&nbsp;&nbsp;📤 **Phase 2: Response Retrieval**  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• **Master** sends dummy bytes to generate clock cycles for the SPI bus.     
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• **Slave** transmits the prepared response over SPI in real time.  
-
-&nbsp;&nbsp;✅ **Health Status Check** – *"Are you alive?"*  
-&nbsp;&nbsp;This is a basic handshake to check if the slave is responsive.
+All tasks ──→ xLogQueue ──→ vTaskSystemLogger ──→ UART terminal
 ```
-|           Master                          |            Slave                              |
-|   Phase 1 Command Sent: "Are you alive?"  |   Phase 1 Command received: "Are you alive?"  |
-|   Phase 1 DUMMY received: FF FF FF FF     |   Phase 1 DUMMY sent: FF FF FF FF             |
-|                                           |                                               |
-|   Phase 2 Command Sent: FF FF FF FF       |   Phase 2 Command received: FF FF FF FF       |
-|   Phase 2 DUMMY received: "I'm alive"     |   Phase 2 DUMMY sent: "I'm alive"             |
+#### 📡 Peripheral Drivers
+**SPI1 — BME680**
+Bare-metal SPI1 driver with register-level reads. Full duplex master, Mode 0 (CPOL=0, CPHA=0), 1MHz clock. CS manually controlled via PC7 GPIO. Burst read using BME680 auto-increment register pointer.
 ```
-
-📊 **Sensor Data Request** – *Triggered on Anomaly Detection*  
-Upon detecting an anomaly, the master requests the latest sensor readings from the slave.
+PB3 — SCK  (AF5)
+PA7 — MOSI (AF5)
+PA6 — MISO (AF5)
+PC7 — CS   (GPIO output, active low)
 ```
-|           Master                          |            Slave                              |
-|  Phase 1 Command Sent: "Data Request"     |   Phase 1 Command received: "Data Request"    |
-|  Phase 1 DUMMY received: FF FF FF FF      |   Phase 1 DUMMY sent: FF FF FF FF             |
-|                                           |                                               |
-|  Phase 2 Command Sent: FF FF FF FF        |   Phase 2 Command received: FF FF FF FF       |
-|  Phase 2 DUMMY received: "1.1, 2.2,..."   |   Phase 2 DUMMY sent: "1.1, 2.2, 3.3..."      |
+**I2C1 — PMSA003I**
+Bare-metal I2C1 driver at 100kHz standard mode with 16MHz APB1 clock. Combined master transmitter / master receiver transaction — write register address, repeated start, read response bytes.
 ```
----
-### 🏗 System Architecture
+PB6 — SCL (AF4)
+PB7 — SDA (AF4)
 ```
-[Sensors] → [STM32 Sensor Node] → [SPI] → [ESP32 FACP/Cloud Node] → [MQTT] → [Cloud Dashboard]
+**UART1 — MODBUS**
+Bare-metal UART1 driver at 115200 baud. ISR-driven ring buffer — ISR owns the head, `vTaskModbusSlave` owns the tail. Frame boundary detected via 3.5 character silence timeout (~2ms at 115200 baud).
 ```
-### 🛠️ Tools and Software
-𐂷 **Sensor Node**  
-&nbsp;&nbsp;&nbsp;⎔ **VS Code** - Primary code editor for STM32 firmware development      
-&nbsp;&nbsp;&nbsp;⎔ **OpenOCD** - Used for flashing and debugging over SWD     
-&nbsp;&nbsp;&nbsp;⎔ **Makefile** - Handles compilation, linking, and build automation   
-
-🌐 **FACP / Cloud Gateway**     
-&nbsp;&nbsp;&nbsp;⎔ **ESP-IDF** - Official development framework for ESP32 firmware    
-&nbsp;&nbsp;&nbsp;⎔ **VS Code** - Development environment with ESP-IDF integration and UART debugging           
-&nbsp;&nbsp;&nbsp;⎔ **AWS Cloud** - Powers the IoT backend with services like:  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• AWS IoT Core – Secure device connectivity and MQTT messaging   
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Amazon Timestream – Time-series database for storing sensor data  
-
-### **Hardware Connections**
-| **STM32 PIN** | **Interface**  | **ESP32 Pin** |
-|---------------|----------------|---------------|
-|     PA6       |     SPI MISO   |    GPIO19     |
-|     PA7       |     SPI MOSI   |    GPIO23     |
-|     PA4       |     SPI NSS    |    GPIO5      |
-|     PA5       |     SPI SCK    |    GPIO18     |
-|     PB6       | GPIO Interrupt |    GPIO22     |
-|     GND       |      GND       |     GND       |
-
+PA9  — TX (AF7)
+PA10 — RX (AF7)
+```
 ---
 ### 📂 Project Code Structure
 ```
@@ -144,7 +93,6 @@ Upon detecting an anomaly, the master requests the latest sensor readings from t
 │   │   │   └── 📄 uart2_driver.c
 │   │   ├── 📁 sensors/                      (Sensor driver implementations)
 │   │   │   ├── 📄 bme680_enviro_sensor.c
-│   │   │   ├── 📄 tmp102_temp_sensor.c
 │   │   │   ├── 📄 button_flame_sensor.c
 │   │   │   ├── 📄 simulate_smoke_sensor.c
 │   │   │   └── 📄 simulate_gas_sensor.c
@@ -190,10 +138,3 @@ Upon detecting an anomaly, the master requests the latest sensor readings from t
 ---
 ### 🎬 Demo
 ![Demo](./demo.gif)
-
-
-
-
-
-
-
