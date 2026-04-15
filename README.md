@@ -6,7 +6,7 @@ The project is organized into four components:
 - 🟠 **STM32 Sensor Node** - environmental sensing, anomaly detection, and MODBUS slave communication
 - 🔵 **MODBUS RTU** - industrial communication protocol stack implemented from scratch between sensor nodes and control panel
 - 🔴 **ESP32 Fire Alarm Control Panel** - MODBUS master polling, and cloud gateway
-- 🟢 **Sensor Node PCB Design** - KiCad schematic for a custom sensor node PCB with a clear v1/v2 revision roadmap
+- 🟢 **Sensor Node PCB Design** - KiCad schematic for a custom sensor node PCB with a clear v1/v2 revision roadmap.  
 | | Component | Description |
 |---|---|---|
 | 🟠 | **STM32 Sensor Node** | Environmental sensing, anomaly detection, and MODBUS slave communication |
