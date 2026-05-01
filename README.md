@@ -86,7 +86,7 @@ The ESP32 firmware is organized into ESP-IDF components — self-contained modul
 | `uart` | UART2 peripheral driver for RS-485 communication with STM32 nodes |
 
 #### 📡 Peripheral Drivers
-**UART2 - MODBUS RTU**
+**UART2 - MODBUS RTU**    
 ESP-IDF UART driver at 115200 baud. Master sends FC 0x03 read requests to STM32 slave nodes and receives sensor telemetry responses. Response timeout configurable per poll cycle.
 ```
 GPIO17 — TX
