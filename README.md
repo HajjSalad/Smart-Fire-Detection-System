@@ -78,7 +78,7 @@ All tasks ──→ xLogQueue ──→ vTaskSystemLogger ──→ UART termina
 ### 🔴 ESP32 Fire Alarm Control Panel
 The ESP-IDF-based Fire Alarm Control Panel acts as the MODBUS RTU master - periodically polling STM32 sensor nodes over RS-485 and aggregating telemetry.
 #### 🧩 Components
-The ESP32 firmware is organized into ESP-IDF components — self-contained modules each with their own source, headers, and build configuration.  
+The ESP32 firmware is organized into ESP-IDF components - self-contained modules each with their own source, headers, and build configuration.  
 
 | Component | Responsibility |
 |---|---|
@@ -99,7 +99,7 @@ GPIO16 — RX
 | `vTaskLogger` | 1 | Sole consumer of `xLogQueue` — drains and prints all log messages to UART terminal |
 ---
 ### 🟢 Sensor Node PCB Design
-A custom STM32F446RETx sensor node PCB designed in KiCad.
+A custom `STM32F446RETx` sensor node PCB designed in KiCad.
 #### 🔧 Version 1
 ![schematic_v1](./schematic_v1.png)
 ---
