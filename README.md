@@ -6,7 +6,8 @@ The project is organized into four components:
 - 🟠 **STM32 Sensor Node** - environmental sensing, anomaly detection, and MODBUS slave communication
 - 🔵 **MODBUS RTU** - industrial communication protocol implemented between sensor nodes and control panel
 - 🔴 **ESP32 Fire Alarm Control Panel** - MODBUS master polling, and cloud gateway
-- 🟢 **Sensor Node PCB Design** - KiCad schematic for a custom sensor node PCB with v1/v2 revision roadmap
+- 🟢 **Sensor Node PCB Design** - KiCad schematic for a custom sensor node PCB with v1/v2 revision roadmap    
+![overview](./overview.jpeg)
 ---
 ### 🟠 STM32 Sensor Node
 The FreeRTOS-based sensor node continuously samples environmental telemetry across multiple sensor interfaces, performs on-device anomaly detection, and responds to MODBUS RTU polling requests from the ESP32 Fire Alarm Control Panel over RS-485.
@@ -14,9 +15,30 @@ The FreeRTOS-based sensor node continuously samples environmental telemetry acro
 | Sensor | Measurement | Interface | Status |
 |---|---|---|---|
 | BME680 | Temperature, Humidity, Pressure, VOC | SPI1 | Real hardware |
-| PMSA003I | PM2.5 Particulate Matter | I2C1 | Simulated |
+| Smoke Sensor | PM2.5 Particulate Matter | - | Simulated |
 | Gas Sensor | CO2 ppm | — | Simulated |
 | Flame Sensor | Flame detected / not detected | GPIO | Real hardware |
+#### 📡 Peripheral Drivers
+**SPI1 - BME680**   
+Bare-metal SPI1 driver with register-level reads. Full duplex master, Mode 0 (CPOL=0, CPHA=0), 1MHz clock. CS manually controlled via PC7 GPIO. Burst read using BME680 auto-increment register pointer.
+```
+PB3 — SCK  (AF5)
+PA7 — MOSI (AF5)
+PA6 — MISO (AF5)
+PC7 — CS   (GPIO output, active low)
+```
+**UART1 - MODBUS**   
+Bare-metal UART1 driver at 115200 baud. ISR-driven ring buffer — ISR owns the head, `vTaskModbusSlave` owns the tail. Frame boundary detected via 3.5 character silence timeout (~2ms at 115200 baud).
+```
+PA9  — TX (AF7)
+PA10 — RX (AF7)
+```
+**UART2 - Debug Logging**   
+Dedicated UART for terminal debug output. `vTaskSystemLogger` is the sole writer - drains `xLogQueue` and transmits log messages without blocking other tasks.
+```
+PA2 - TX (AF7)
+PA3 - RX (AF7)
+```
 #### 🧵 Task Model
 | Task | Priority | Responsibility |
 |---|---|---|
@@ -24,13 +46,13 @@ The FreeRTOS-based sensor node continuously samples environmental telemetry acro
 | `vTaskAnomalyDetect` | 5 | Blocks on `xSensorDataQueue`, checks readings against thresholds, raises alert flag |
 | `vTaskModbusSlave` | 4 | Polls UART ring buffer, parses MODBUS frames, reads `shared_sensor_data`, sends response |
 | `vTaskSystemLogger` | 3 | Sole consumer of `xLogQueue` - drains and prints all log messages to UART terminal |
-### 🔗 FreeRTOS Resources
+#### 🔗 FreeRTOS Resources
 | Resource | Type | Purpose |
 |---|---|---|
 | `xSensorDataMutex` | Mutex | Guards `shared_sensor_data` between `vTaskSensorRead` and `vTaskModbusSlave` |
 | `xSensorDataQueue` | Queue | Passes `SensorData_t` from `vTaskSensorRead` → `vTaskAnomalyDetect` |
 | `xLogQueue` | Queue | Passes log strings from all tasks → `vTaskSystemLogger` |
-### 🔀 Data Flow
+#### 🔀 Data Flow
 ```
 ┌──────────────────┐                                               ┌──────────────────┐
 │ vTaskSensorRead  │─── writes ───→ shared_sensor_data ←── reads ──  vTaskModbusSlave
@@ -48,27 +70,37 @@ The FreeRTOS-based sensor node continuously samples environmental telemetry acro
 
 All tasks ──→ xLogQueue ──→ vTaskSystemLogger ──→ UART terminal
 ```
+---
+### 🔵 MODBUS RTU
+
+---
+### 🔴 ESP32 Fire Alarm Control Panel
+The ESP-IDF-based Fire Alarm Control Panel acts as the MODBUS RTU master - periodically polling STM32 sensor nodes over RS-485 and aggregating telemetry.
+#### 🧩 Components
+The ESP32 firmware is organized into ESP-IDF components — self-contained modules each with their own source, headers, and build configuration.  
+
+| Component | Responsibility |
+|---|---|
+| `modbus` | MODBUS master task, frame construction, CRC-16, response parsing |
+| `uart` | UART2 peripheral driver for RS-485 communication with STM32 nodes |
+
 #### 📡 Peripheral Drivers
-**SPI1 — BME680**   
-Bare-metal SPI1 driver with register-level reads. Full duplex master, Mode 0 (CPOL=0, CPHA=0), 1MHz clock. CS manually controlled via PC7 GPIO. Burst read using BME680 auto-increment register pointer.
+**UART2 - MODBUS RTU**
+ESP-IDF UART driver at 115200 baud. Master sends FC 0x03 read requests to STM32 slave nodes and receives sensor telemetry responses. Response timeout configurable per poll cycle.
 ```
-PB3 — SCK  (AF5)
-PA7 — MOSI (AF5)
-PA6 — MISO (AF5)
-PC7 — CS   (GPIO output, active low)
+GPIO17 — TX
+GPIO16 — RX
 ```
-**I2C1 — PMSA003I**   
-Bare-metal I2C1 driver at 100kHz standard mode with 16MHz APB1 clock. Combined master transmitter / master receiver transaction — write register address, repeated start, read response bytes.
-```
-PB6 — SCL (AF4)
-PB7 — SDA (AF4)
-```
-**UART1 — MODBUS**   
-Bare-metal UART1 driver at 115200 baud. ISR-driven ring buffer — ISR owns the head, `vTaskModbusSlave` owns the tail. Frame boundary detected via 3.5 character silence timeout (~2ms at 115200 baud).
-```
-PA9  — TX (AF7)
-PA10 — RX (AF7)
-```
+#### 🧵 Task Model
+| Task | Priority | Responsibility |
+|---|---|---|
+| `modbus_master_task` | 4 | Builds MODBUS requests, polls STM32 nodes, validates CRC, parses response, logs telemetry |
+| `vTaskLogger` | 1 | Sole consumer of `xLogQueue` — drains and prints all log messages to UART terminal |
+---
+### 🟢 Sensor Node PCB Design
+A custom STM32F446RETx sensor node PCB designed in KiCad.
+#### 🔧 Version 1
+![schematic_v1](./schematic_v1.png)
 ---
 ### 📂 Project Code Structure
 ```
