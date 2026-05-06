@@ -32,9 +32,6 @@ void vTaskLogger(void *pvParameters)
             msg[LOG_MSG_MAX_LEN - 1] = '\0';  // Ensure null termination
             printf("%s\n\r", msg);
         }
-        
-        // // Sleep until next read cycle
-        // vTaskDelay(pdMS_TO_TICKS(LOGGER_TASK_PERIOD_MS));
     }
 }
 

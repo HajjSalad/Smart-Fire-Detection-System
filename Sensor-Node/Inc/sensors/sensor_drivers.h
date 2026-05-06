@@ -8,6 +8,15 @@
 
 #include <stdint.h>
 
+/* ---  BME680 Environment Sensor --- */
+typedef enum {
+    BME680_OK    = 0,
+    BME680_ERROR = 1
+} BME680_Status_t;
+
+BME680_Status_t bme680_init(void);
+BME680_Status_t bme680_read(float *temp, float *humi, float *pres, float *voc);
+
 /* ---  Gas sensor - Simulated (No sensor) --- */
 typedef enum { 
     GAS_OK = 0, 
@@ -36,19 +45,5 @@ typedef enum {
     FLAME_NOT_DETECTED = 0,
     FLAME_DETECTED     = 1
 } Flame_State_t;
-
-/* ---  TMP102 Temp Sensor --- */
-typedef enum {
-    TMP102_OK    = 0,
-    TMP102_ERROR = 1
-} TMP102_Status_t;
-
-TMP102_Status_t tmp102_init(void);
-TMP102_Status_t tmp102_read(float *temp);
-
-/* ---  BME680 Environment Sensor --- */
-
-
-
 
 #endif      // SENSOR_DRIVERS_H

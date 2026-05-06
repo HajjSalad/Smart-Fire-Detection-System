@@ -33,11 +33,13 @@ void spi1_init(void)
     // 3. PC7 -> GPIO output, idle HIGH
     GPIOC->MODER |=  (1U<<14);          
     GPIOC->MODER &=~ (1U<<15);
-    GPIOC->ODR   |=  (1U<<7);           // output data register
+    GPIOC->ODR   |=  (1U<<7);           // CS high at startup
 
     // 3. Set AF5 (SPI1) for SCK, MOSI, MISO
     GPIOB->AFR[0] |= (5<<12);           // PB3
+    GPIOA->AFR[0] &=~(0xFU<<28);
     GPIOA->AFR[0] |= (5<<28);           // PA7
+    GPIOA->AFR[0] &=~(0xFU<<24);
     GPIOA->AFR[0] |= (5<<24);           // PA6
 
     // 4. Disable SPI1 before configuration
@@ -50,7 +52,7 @@ void spi1_init(void)
     SPI1->CR1 &=~ SPI_CR1_CPOL;          // CPOL = 0 (clock idle LOW)
     SPI1->CR1 &=~ SPI_CR1_CPHA;          // CPHA = 0 (sample on first edge)
 
-    // 7. Baud rate — APB2/16 = 16MHz/16 = 1MHz
+    // 7. Baud rate — APB2/16 = 16MHz/16 = 1MHz - 011
     SPI1->CR1 |= SPI_CR1_BR_1 | SPI_CR1_BR_0;               
 
     // 8. 8-bit data frame
@@ -65,6 +67,14 @@ void spi1_init(void)
 
     // 11. Enable SPI
     SPI1->CR1 |= SPI_CR1_SPE;
+
+    printf("SPI CR1: 0x%08lX\n\r", SPI1->CR1);
+    printf("SPI SR:  0x%08lX\n\r", SPI1->SR);
+    printf("GPIOB MODER: 0x%08lX\n\r", GPIOB->MODER);
+    printf("GPIOB AFR0:  0x%08lX\n\r", GPIOB->AFR[0]);
+    printf("GPIOA MODER: 0x%08lX\n\r", GPIOA->MODER);
+    printf("GPIOA AFR0:  0x%08lX\n\r", GPIOA->AFR[0]);
+    printf("GPIOC MODER: 0x%08lX\n\r", GPIOC->MODER);
 }
 
 /** @brief Pull CS low - Select */

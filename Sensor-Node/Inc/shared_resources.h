@@ -25,7 +25,7 @@ extern QueueHandle_t            xLogQueue;
 
 // Sensor data
 typedef struct {
-    float    temp;       /* Temperature       : °C     — TMP102    */
+    float    temp;       /* Temperature       : °C     — BME680    */
     float    humi;       /* Humidity          : %RH    — BME680    */
     float    pres;       /* Pressure          : hPa    — BME680    */
     float    voc;        /* VOC               : Ω      — BME680    */
@@ -34,6 +34,8 @@ typedef struct {
     uint8_t  flame;      /* Flame detected    : 0/1    — GPIO      */
     uint32_t timestamp;  /* Tick count        : ms     — FreeRTOS  */
 } SensorData_t;
+
+extern volatile uint8_t flame_detected;  /* Flame detection: 0/1 — GPIO */
 
 // Shared struct between Task 1 and Modbus
 extern SensorData_t             shared_sensor_data;

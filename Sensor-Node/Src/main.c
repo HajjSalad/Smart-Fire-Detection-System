@@ -17,7 +17,8 @@
 
 #include "tasks.h"
 #include "sensor_drivers.h"
-#include "i2c_driver.h"
+#include "spi_driver.h"
+#include "exti_driver.h"
 #include "uart_driver.h"
 #include "shared_resources.h"
 
@@ -52,14 +53,17 @@ int main(void)
 {
     BaseType_t xRet = pdFALSE;
 
+     
     uart2_init();               // Initialize UART2 for logging
+    spi1_init();                //
     uart1_init();               // Initialize UART1 for ESP32 communication
-    i2c1_init();                //
-    tmp102_init();
+    exti_init();                // Init the input interrupts for flame sensor
+    
+    
 
     // Initialize sensor drivers
     // flame_sensor_init();
-    
+
 
     check_reset_cause();        // Log the cause of the last reset
 
@@ -86,7 +90,7 @@ int main(void)
     */
 
     // Create task
-    xRet = xTaskCreate(vTaskSensorRead,    "SensorRead",    512, NULL, 6, NULL);
+    xRet = xTaskCreate(vTaskSensorRead,    "SensorRead",    4096, NULL, 6, NULL);
     configASSERT(xRet == pdPASS);
     xRet = xTaskCreate(vTaskAnomalyDetect, "AnomalyDetect", 512, NULL, 5, NULL);
     configASSERT(xRet == pdPASS);
@@ -114,8 +118,8 @@ static void check_reset_cause(void)
     uint32_t cause = RCC->CSR;
     RCC->CSR |= RCC_CSR_RMVF;           // Clear reset flags
 
-    if (cause & RCC_CSR_IWDGRSTF) { LOG("Reset: Watchdog"); }
-    if (cause & RCC_CSR_SFTRSTF)  { LOG("Reset: Software"); }
-    if (cause & RCC_CSR_PORRSTF)  { LOG("Reset: Power-On"); }
-    if (cause & RCC_CSR_PINRSTF)  { LOG("Reset: External Pin"); }
+    if (cause & RCC_CSR_IWDGRSTF) { LOG("\rReset: Watchdog"); }
+    if (cause & RCC_CSR_SFTRSTF)  { LOG("\rReset: Software"); }
+    if (cause & RCC_CSR_PORRSTF)  { LOG("\rReset: Power-On"); }
+    if (cause & RCC_CSR_PINRSTF)  { LOG("\rReset: External Pin"); }
 }
