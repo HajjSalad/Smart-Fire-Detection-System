@@ -14,6 +14,7 @@
 #include <stdio.h>
 
 // Function Prototypes
+void vTaskWatchdogTimer(void *pvParameters);
 void vTaskSensorRead(void *pvParameters);
 void vTaskAnomalyDetect(void *pvParameters);
 void vTaskModbusSlave(void *pvParameters);

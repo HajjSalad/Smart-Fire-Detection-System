@@ -35,8 +35,6 @@
 /* ── Exception codes ── */
 #define MODBUS_EX_ILLEGAL_FUNCTION  0x01U   // unsupported function code 
 #define MODBUS_EX_ILLEGAL_ADDRESS   0x02U   // register addr out of range
-#define MODBUS_EX_ILLEGAL_VALUE     0x03U   // invalid register value    
-#define MODBUS_EX_SERVER_FAILURE    0x04U   // internal slave error      
 
 /* ── Register addresses ── */
 #define REG_TEMPERATURE             0x0000U
@@ -46,7 +44,9 @@
 #define REG_CO2                     0x0004U
 #define REG_PM25                    0x0005U
 #define REG_FLAME                   0x0006U
+
 #define REG_COUNT                   7U       // total number of registers
+#define MODBUS_START_ADDR           0x0000U
 
 /* ── Scaling factors ── */
 #define SCALE_TEMP                  100U    /* °C    × 100  */

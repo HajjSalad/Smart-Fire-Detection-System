@@ -12,7 +12,7 @@
  * SPI1 SCK  - PB3  (AF5)
  * SPI1 MOSI - PA7  (AF5)
  * SPI1 MISO - PA6  (AF5)
- * SPI1 CS   - PC7  (GPIO output, active low)
+ * SPI1 CS   - PC8  (GPIO output, active low)
 */
 void spi1_init(void) 
 {
@@ -30,10 +30,10 @@ void spi1_init(void)
     GPIOA->MODER &=~ (1U<<12);          // PA6 to alternate function mode
     GPIOA->MODER |=  (1U<<13);
 
-    // 3. PC7 -> GPIO output, idle HIGH
-    GPIOC->MODER |=  (1U<<14);          
-    GPIOC->MODER &=~ (1U<<15);
-    GPIOC->ODR   |=  (1U<<7);           // CS high at startup
+    // 3. PC8 -> GPIO output, idle HIGH
+    GPIOC->MODER &=~ (3U<<16);
+    GPIOC->MODER |=  (1U<<16);          
+    GPIOC->ODR   |=  (1U<<8);           // CS high at startup
 
     // 3. Set AF5 (SPI1) for SCK, MOSI, MISO
     GPIOB->AFR[0] |= (5<<12);           // PB3
@@ -53,6 +53,7 @@ void spi1_init(void)
     SPI1->CR1 &=~ SPI_CR1_CPHA;          // CPHA = 0 (sample on first edge)
 
     // 7. Baud rate — APB2/16 = 16MHz/16 = 1MHz - 011
+
     SPI1->CR1 |= SPI_CR1_BR_1 | SPI_CR1_BR_0;               
 
     // 8. 8-bit data frame
@@ -67,33 +68,24 @@ void spi1_init(void)
 
     // 11. Enable SPI
     SPI1->CR1 |= SPI_CR1_SPE;
-
-    printf("SPI CR1: 0x%08lX\n\r", SPI1->CR1);
-    printf("SPI SR:  0x%08lX\n\r", SPI1->SR);
-    printf("GPIOB MODER: 0x%08lX\n\r", GPIOB->MODER);
-    printf("GPIOB AFR0:  0x%08lX\n\r", GPIOB->AFR[0]);
-    printf("GPIOA MODER: 0x%08lX\n\r", GPIOA->MODER);
-    printf("GPIOA AFR0:  0x%08lX\n\r", GPIOA->AFR[0]);
-    printf("GPIOC MODER: 0x%08lX\n\r", GPIOC->MODER);
 }
 
 /** @brief Pull CS low - Select */
 void spi1_cs_low(void)
 {
-    GPIOC->ODR &=~ (1U<<7);     // PC7 low
+    GPIOC->ODR &=~ (1U<<8);     // PC8 low
 }
 
 /** @brief Pull CS high - deselect */
 void spi1_cs_high(void)
 {
-    GPIOC->ODR |= (1U<<7);     // PC7 high
+    GPIOC->ODR |= (1U<<8);     // PC8 high
 }
 
 /**
  * @brief Transmit and receive one byte over SPI1
  * 
- * Full duplex SPI - every transmit is simultaneously 
- * a receive
+ * Full duplex SPI - every transmit is simultaneously a receive
 */
 uint8_t spi1_transmit_receive(uint8_t data)
 {
@@ -110,50 +102,42 @@ uint8_t spi1_transmit_receive(uint8_t data)
 }
 
 /**
- * @brief Write one byte to a BME680 register
+ * @brief Write one or more bytes to BME680 registers
+ * 
+ * CS held low for entire transaction.
+ * BME680 auto-increments register pointer after each byte.
  * 
  * Used for config - set oversampling, mode, filter etc
- * MSB = 0 indicates write operation to BME680
-*/
-void spi1_write_reg(uint8_t reg, uint8_t data)
-{
-    spi1_cs_low();
-    spi1_transmit_receive(reg & 0x7F);      // MSB=0 -> write
-    spi1_transmit_receive(data);
-    spi1_cs_high();
-}
-
-/**
- * @brief Read one byte from a BME680 register
  * 
- * MSB = 1 indicate read operation to BME680
- * First byte selects register, second byte clocks out the data
+ * @param reg   Start register address
+ * @param data  Data to write
+ * @param len   Number of bytes to write
 */
-uint8_t spi1_read_reg(uint8_t reg)
+void spi1_write_regs(uint8_t reg, const uint8_t *data, uint8_t len)
 {
-    uint8_t data;
-
     spi1_cs_low();
-    spi1_transmit_receive(reg & 0x80);      // MSB=1 -> write
-    data = spi1_transmit_receive(0x00);     // dummy byte -> clock out data
-    spi1_cs_high();
+    spi1_transmit_receive(reg);             // register address - where to write
 
-    return data;
+    for (uint8_t i = 0U; i < len; i++) {
+        spi1_transmit_receive(data[i]);     // data value - what to write (MISO ignored)
+    }
+
+    spi1_cs_high();
 }
 
 /**
- * @brief Read multiple consecutive registers
+ * @brief Read multiple consecutive BME680 registers
  * 
  * Keep CS low for the entire burst read
- * Sends register start address once, then clocks out len bytes
+ * First byte selects register start addr, second byte clocks out the data
  * BME680 auto-increments register pointer after each byte clocked out
 */
 void spi1_read_regs(uint8_t reg, uint8_t *buf, uint8_t len)
 {
     spi1_cs_low();
-    spi1_transmit_receive(reg | 0x80);  // MSB=1 -> read, set start address
+    spi1_transmit_receive(reg);                 // select register start addr
 
-    for (uint8_t i = 0; i < len; i++){
+    for (uint32_t i = 0; i < len; i++){
         buf[i] = spi1_transmit_receive(0x00);   // clock out each byte
     }
 

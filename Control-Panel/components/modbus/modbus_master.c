@@ -16,9 +16,10 @@
 #include "modbus_master.h"
 #include "modbus_register.h"
 
-#define MODBUS_MAX_FRAME_LEN              256U
-#define MODBUS_MIN_FRAME_LEN              4U      // addr + FC + DATA + CRC   
-#define MODBUS_RESPONSE_TIMEOUT_MS        1000U
+#define RESPONSE_MAX_FRAME_LEN              256U
+#define RESPONSE_MIN_FRAME_LEN              5U          // exception response is smallest = 5
+#define REQUEST_MIN_FRAME_LEN               8U  
+#define MODBUS_RESPONSE_TIMEOUT_MS          1000U
 
 static const char *TAG = "MODBUS_MASTER";
 
@@ -29,48 +30,49 @@ void modbus_parse_received_response(uint8_t *response, uint8_t len);
 static void modbus_master_task(void *pvParameters)
 {
     ESP_ERROR_CHECK(modbus_uart2_init());                // Initialize UART2 for modbus comm with STM32
-    printf("MODBUS Master started\n");
 
-    uint8_t request[8]          = {0};
-    uint8_t req_len             = 0U;
+    uint8_t request[REQUEST_MIN_FRAME_LEN]  = {0};
+    uint8_t req_len                         = 0U;
 
-    uint8_t response[MODBUS_MAX_FRAME_LEN] = {0};
+    uint8_t response[RESPONSE_MAX_FRAME_LEN] = {0};
     int byte_received = 0;
 
     while(1) 
     {
-        //printf("Modbus Task running\n");
-
         // 1. Build request frame
         req_len = modbus_build_read_request(request);
 
-        // 2. Flush any stale data in RX buffer
-        //uart_flush(UART_NUM2);
+        // Print request frame sent
+        printf("Request frame sent: ");
+        for (int i = 0; i < req_len; i++) {
+            printf("%02X ", request[i]);
+        }
+        printf("\n");
 
-        // 3. Send request to STM32
+        // 2. Send request to STM32
         uart_write_bytes(UART_NUM2, request, req_len);
         printf("Request sent - waiting for response...\n");
 
-        // 4. Wait for response
+        // 3. Wait for response
         memset(response, 0, sizeof(response));
         byte_received = uart_read_bytes(UART_NUM2, response, sizeof(response),
                                         pdMS_TO_TICKS(MODBUS_RESPONSE_TIMEOUT_MS));
 
-        // 5. Parse response
+        // 4. Parse response
         if (byte_received > 0) {
             modbus_parse_received_response(response, (uint8_t)byte_received);
         } else {
             printf("Timeout - no response from slave\n\n");
         }
 
-        // 6. Sleep until next read cycle
+        // 5. Sleep until next read cycle
         vTaskDelay(pdMS_TO_TICKS(5000));
     }
 }
 /**
  * @brief Build FC 0x03 read holding registers request
  * 
- * Read request format:
+ * Read request frame format:
  * [slave_addr][FC][start_addr_H][start_addr_L][quantity_H][quantity_L][CRC_L][CRC_H]
 */
 uint8_t modbus_build_read_request(uint8_t *request)
@@ -93,28 +95,28 @@ uint8_t modbus_build_read_request(uint8_t *request)
 }
 
 /**
- * @brief
+ * @brief Parse the received frame from slave
  * 
  * Response format:
  * [slave_addr][FC][byte_count][reg0_H][reg0_L]...[regN_H][regN_L][CRC_H][CRC_L]
 */
 void modbus_parse_received_response(uint8_t *response, uint8_t len)
 {
-    // 1. Minimum reponse: addr(1)+FC(1)+byte_count(1)+data(2)+CRC(2) = 7
-    if (len < 7U) {
+    // 1. Minimum reponse is exception: addr(1) + fc(1) + except(1) + crc(2) = 5
+    if (len < RESPONSE_MIN_FRAME_LEN) {
         printf("Response too short: %d bytes\n", len);
         return;
     }
 
     // 2. Validate slave addr
-    if (response[0] != MODBUS_SLAVE_ADDR) {
+    if (response[SLAVE_ADDR_POS] != MODBUS_SLAVE_ADDR) {
         printf("Wrong slave address: 0x%02X\n", response[0]);
         return;
     }
 
     // 3. Check for exception response - FC has MSB set
-    if (response[1] & 0x80U) {
-        printf("Slave exception: 0x%02X\n", response[2]);
+    if (response[FC_ADDR_POS] & 0x80U) {
+        printf("Slave exception: 0x%02X\n", response[EX_ADDR_POS]);
         return;
     }
 
@@ -125,6 +127,13 @@ void modbus_parse_received_response(uint8_t *response, uint8_t len)
         printf("CRC failed — rx:0x%04X calc:0x%04X\n", crc_received, crc_calculated);
         return;
     }
+
+    // Print response frame received
+    printf("Response frame received: ");
+    for (int i = 0; i < len; i++) {
+        printf("%02X ", response[i]);
+    }
+    printf("\n");
 
     // 5. Extract register values - big endian, starting at byte 3
     uint8_t *data = &response[3];

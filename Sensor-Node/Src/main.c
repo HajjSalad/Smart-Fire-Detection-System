@@ -20,6 +20,7 @@
 #include "spi_driver.h"
 #include "exti_driver.h"
 #include "uart_driver.h"
+#include "iwdg_driver.h"
 #include "shared_resources.h"
 
 // Local function prototypes
@@ -44,6 +45,23 @@ void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName) {
 }
 
 /**
+ * @brief Clock configuration
+ * 
+ * The STM32F446RE boots with the HSI(Hisgh Speed Internal) oscillator running at 
+ * 16MHz by default - no external crystal, no PLL configured.
+ * 
+ * Clock tree not configured for this firmware, therefore:
+ *  HSI oscillator  = 16MHz
+ *  AHB prescaler   = /1  → AHB clock  = 16MHz
+ *  APB1 prescaler  = /1  → APB1 clock = 16MHz  (I2C, UART2, SPI2/3)
+ *  APB2 prescaler  = /1  → APB2 clock = 16MHz  (SPI1, UART1)
+ * 
+ * All buses run at 16MHz.
+ * 
+ * Checking RCC_CFGR: 0x00000000 - default config, HSI, no PLL, all prescalers = /1 
+*/
+
+/**
  * @brief Application entry point.
  * 
  * Initializes UART peripherals, creates FreeRTOS synchronization
@@ -53,17 +71,11 @@ int main(void)
 {
     BaseType_t xRet = pdFALSE;
 
-     
     uart2_init();               // Initialize UART2 for logging
     spi1_init();                //
     uart1_init();               // Initialize UART1 for ESP32 communication
     exti_init();                // Init the input interrupts for flame sensor
-    
-    
-
-    // Initialize sensor drivers
-    // flame_sensor_init();
-
+    //iwdg_init();
 
     check_reset_cause();        // Log the cause of the last reset
 
@@ -82,6 +94,7 @@ int main(void)
      * Priorities  (in FreeRTOS, 0 = lowest priority)
      * MAX_PRIORITIES = 16
      * 
+     * Priority 7  → Watchdog timer
      * Priority 6  → Sensor read
      * Priority 5  → Anomaly detect
      * Priority 4  → Modbus Slave
@@ -90,11 +103,13 @@ int main(void)
     */
 
     // Create task
-    xRet = xTaskCreate(vTaskSensorRead,    "SensorRead",    4096, NULL, 6, NULL);
+    xRet = xTaskCreate(vTaskWatchdogTimer, "WatchdogTimer", 512, NULL, 7, NULL);
+    configASSERT(xRet == pdPASS);
+    xRet = xTaskCreate(vTaskSensorRead,    "SensorRead",    2048, NULL, 6, NULL);
     configASSERT(xRet == pdPASS);
     xRet = xTaskCreate(vTaskAnomalyDetect, "AnomalyDetect", 512, NULL, 5, NULL);
     configASSERT(xRet == pdPASS);
-    xRet = xTaskCreate(vTaskModbusSlave,    "ModbusSlave",  512, NULL, 4, NULL);
+    xRet = xTaskCreate(vTaskModbusSlave,    "ModbusSlave",  1024, NULL, 4, &xModbusTaskHandle);
     configASSERT(xRet == pdPASS);
     xRet = xTaskCreate(vTaskLogger,         "Logger",       512, NULL, 3, NULL);
     configASSERT(xRet == pdPASS);
@@ -115,7 +130,7 @@ int main(void)
 */
 static void check_reset_cause(void) 
 {
-    uint32_t cause = RCC->CSR;
+    uint32_t cause = RCC->CSR;          // get the reset flag
     RCC->CSR |= RCC_CSR_RMVF;           // Clear reset flags
 
     if (cause & RCC_CSR_IWDGRSTF) { LOG("\rReset: Watchdog"); }

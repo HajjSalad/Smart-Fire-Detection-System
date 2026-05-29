@@ -44,6 +44,7 @@ C_INCLUDES = -IInc \
              -IInc/core \
              -IInc/tasks \
 			 -IInc/utils \
+			 -IInc/system \
 		     -IInc/sensors \
              -IInc/CMSIS/Core/Include \
              -IInc/STM32F4xx/Include \
@@ -106,6 +107,11 @@ $(BUILD_DIR)/%.o: Src/%.cpp | $(BUILD_DIR)
 
 # Compile C sources - Src/tasks/
 $(BUILD_DIR)/%.o: Src/tasks/%.c | $(BUILD_DIR)
+	@echo "Compiling $< ..."
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Compile C sources - Src/system/
+$(BUILD_DIR)/%.o: Src/system/%.c | $(BUILD_DIR)
 	@echo "Compiling $< ..."
 	$(CC) $(CFLAGS) -c $< -o $@
 

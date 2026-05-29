@@ -6,7 +6,7 @@
  * - Place the bytes in a frame
  * - Process the modbus frames
  * - Builds the modbus response
- * - 
+ * - Send response to master
 */
 
 #include <stdio.h>
@@ -25,14 +25,18 @@
 #include "shared_resources.h"
 
 #define MODBUS_SLAVE_TASK_PERIOD_MS      (5000U)
-#define MODBUS_MAX_FRAME_LEN              256U
-#define MODBUS_MIN_FRAME_LEN              4U      // addr + FC + DATA + CRC          
-#define MODBUS_FRAME_TIMEOUT_MS           2U      // 3.5 char @ 115200 ≈ 305µs
+#define REQUEST_MAX_FRAME_LEN            256U
+#define REQUEST_MIN_FRAME_LEN             8U      // addr(1) + FC(1) + start_addr(2) + quantity(2) + CRC(2) = 8          
+#define MODBUS_FRAME_TIMEOUT_MS           3U      // 3.5 char @ 115200 ≈ 305µs -> 3ms would be sufficient
+volatile uint8_t task3_alive = 0U;
+
+// Task Handle for vTaskModbusSlave
+TaskHandle_t xModbusTaskHandle = NULL;
 
 // Function Prototypes
 static void modbus_process_frame(uint8_t *frame, uint8_t len);
 static uint8_t modbus_build_read_response(uint8_t *resp, uint16_t start_addr, uint16_t quantity);
-static void modbus_build_exception_response(uint8_t func_code, uint8_t except_code);
+static void modbus_build_and_send_exception_response(uint8_t func_code, uint8_t except_code);
 static void modbus_send_response(uint8_t *resp, uint8_t len);
 
 /**
@@ -42,57 +46,42 @@ void vTaskModbusSlave(void *pvParameters)
 {
     (void)pvParameters;                 // Suppress unused parameter warning
 
-    uint8_t  byte                        = 0U;
-    uint8_t  frame_len                   = 0U;
-    uint32_t last_rx_tick                = 0U;
-    uint8_t  frame[MODBUS_MAX_FRAME_LEN] = {0};
+    uint8_t  byte                           = 0U;
+    uint8_t  frame_len                      = 0U;
+    uint32_t last_rx_tick                   = 0U;
+    uint8_t  frame[REQUEST_MAX_FRAME_LEN]  = {0};
 
-    BaseType_t xRet = pdFALSE;
     char msg[LOG_MSG_MAX_LEN];
 
     while (1) 
-    {
-        // snprintf(msg, sizeof(msg), "In Task 3");
-        // xRet = xQueueSend(xLogQueue, (const void *)msg, 0U);
-        // if (xRet != pdTRUE) {
-        //     /* Log queue full — drop message */
-        // }
+    {    
+        // Block indefinitely until ISR notifies
+        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 
-        // Poll ring buffer
-        if (uart1_ring_buffer_read(&byte))              // new byte found
-        {
-            // Byte received - add to frame buffer
-            if (frame_len < MODBUS_MAX_FRAME_LEN) {
-                frame[frame_len++] = byte;
+        // Collect bytes
+        do {
+            while (uart1_ring_buffer_read(&byte)) {
+                if (frame_len < REQUEST_MAX_FRAME_LEN) {
+                    frame[frame_len++] = byte;
+                }
             }
-            last_rx_tick = xTaskGetTickCount();         // record timestamp
-        } 
-        else                                            // no new byte
-        {
-            // No new byte - Check silence gap 
-            if (frame_len > 0 && (xTaskGetTickCount() - last_rx_tick) >= MODBUS_FRAME_TIMEOUT_MS)
-            {
-                // Silence detected: Frame receiving complete - Can process the frame now
-                snprintf(msg, sizeof(msg), "[T3] Frame received, %d bytes", frame_len);
-                xQueueSend(xLogQueue, msg, 0U);
+        } while (ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(MODBUS_FRAME_TIMEOUT_MS)) > 0);
 
-                // Process the frame
-                modbus_process_frame(frame, frame_len);
-
-                // Reset for next frame
-                memset(frame, 0, sizeof(frame));
-                frame_len = 0U;
-            }
+        // No notification for 3ms — frame complete
+        if (frame_len > 0) {
+            modbus_process_frame(frame, frame_len);
+            memset(frame, 0, sizeof(frame));
+            frame_len = 0U;
         }
-        // Sleep until next read cycle
-        vTaskDelay(pdMS_TO_TICKS(100));
+
+        task3_alive = 1U;       // Set alive flag
     }
 }
 
 /**
- * @brief 
+ * @brief Process the request frame received from master
  * 
- * Received frame format:
+ * Received request frame format:
  * [slave_addr][FC][start_addr_H][start_addr_L][quantity_H][quantity_L][CRC_L][CRC_H]
 */
 static void modbus_process_frame(uint8_t *frame, uint8_t len)
@@ -100,8 +89,8 @@ static void modbus_process_frame(uint8_t *frame, uint8_t len)
     char msg[LOG_MSG_MAX_LEN];
 
     // 1. Validate the input args
-    if (len < MODBUS_MIN_FRAME_LEN) {
-        snprintf(msg, sizeof(msg), "[T3] Frame too short: %d bytes", len);
+    if (len < REQUEST_MIN_FRAME_LEN) {
+        snprintf(msg, sizeof(msg), "[T3] Request frame received too short: %d bytes", len);
         xQueueSend(xLogQueue, msg, 0U);
         return;
     }
@@ -121,7 +110,18 @@ static void modbus_process_frame(uint8_t *frame, uint8_t len)
         return;
     }
 
-    // 4. Parse function code
+    // 4. Log request frame received 
+    char frame_log[LOG_MSG_MAX_LEN] = {0};
+    char temp[8] = {0};
+
+    snprintf(frame_log, sizeof(frame_log), "[T3] Request frame received  : ");
+    for (int i = 0; i < len; i++) {
+        snprintf(temp, sizeof(temp), "%02X ", frame[i]);
+        strncat(frame_log, temp, sizeof(frame_log) - strlen(frame_log) - 1);
+    }
+    xQueueSend(xLogQueue, frame_log, 0U);
+
+    // 5. Parse function code
     uint8_t func_code = frame[FC_ADDR_POS];
 
     switch(func_code)
@@ -134,19 +134,26 @@ static void modbus_process_frame(uint8_t *frame, uint8_t len)
             // 1. Validate register range
             if (start_addr + quantity > REG_COUNT) {
                 // Send exception - Register addr out of range
-                modbus_build_exception_response(func_code, MODBUS_EX_ILLEGAL_ADDRESS);
+                modbus_build_and_send_exception_response(func_code, MODBUS_EX_ILLEGAL_ADDRESS);
                 return;
             }
 
-            // 2. Build and send response
+            // 2. Build and send read response
             uint8_t resp[32] = {0};
             uint8_t resp_len = modbus_build_read_response(resp, start_addr, quantity);
             modbus_send_response(resp, resp_len);
 
-            // Log
-            snprintf(msg, sizeof(msg), "[T3] Read regs addr:0x%04X qty:%d", 
-                     start_addr, quantity);
-            xQueueSend(xLogQueue, msg, 0U);
+            // 3. Log read response sent
+            char frame_log[LOG_MSG_MAX_LEN] = {0};
+            char temp[8] = {0};
+
+            snprintf(frame_log, sizeof(frame_log), "[T3] Read response frame sent: ");
+            for (int i = 0; i < resp_len; i++) {
+                snprintf(temp, sizeof(temp), "%02X ", resp[i]);
+                strncat(frame_log, temp, sizeof(frame_log) - strlen(frame_log) - 1);
+            }
+            xQueueSend(xLogQueue, frame_log, 0U);
+
             break;
         }
         case MODBUS_FC_WRITE_SINGLE:        // Master writes a value into a slave register
@@ -154,7 +161,8 @@ static void modbus_process_frame(uint8_t *frame, uint8_t len)
             break;
         }
         default:
-            modbus_build_exception_response(func_code, MODBUS_EX_ILLEGAL_FUNCTION);
+            // Send exception - unsupported function code
+            modbus_build_and_send_exception_response(func_code, MODBUS_EX_ILLEGAL_FUNCTION);
             break;
     }
 }
@@ -162,7 +170,7 @@ static void modbus_process_frame(uint8_t *frame, uint8_t len)
 /**
  * @brief Build Function Code: FC 0x03 read holding registers response
  * 
- * Response format:
+ * Response frame format:
  * [slave_addr][FC][byte_count][reg0_H][reg0_L]...[regN_H][regN_L][CRC_H][CRC_L]
 */
 static uint8_t modbus_build_read_response(uint8_t *resp, uint16_t start_addr, uint16_t quantity)
@@ -175,7 +183,7 @@ static uint8_t modbus_build_read_response(uint8_t *resp, uint16_t start_addr, ui
         xSemaphoreGive(xSensorMutex);
     }
 
-    // 2. Scale floats to uint16_t registers for transportation
+    // 2. Scale floats to uint16_t registers for transmission
     uint16_t regs[REG_COUNT];
     regs[REG_TEMPERATURE] = FLOAT_TO_REG(data.temp, SCALE_TEMP);
     regs[REG_HUMIDITY]    = FLOAT_TO_REG(data.humi, SCALE_HUMI);
@@ -201,18 +209,19 @@ static uint8_t modbus_build_read_response(uint8_t *resp, uint16_t start_addr, ui
     uint16_t crc = compute_crc(resp, idx);
     resp[idx++] = (uint8_t)(crc & 0xFFU);               // low byte
     resp[idx++] = (uint8_t)(crc >> 8U);                 // high byte
-    
 
-    return idx;         // Return length of response frame
+    return idx;         // Return length of read response frame
 }
 
 /**
  * @brief Build response for MODBUS exception
- */
-static void modbus_build_exception_response(uint8_t func_code, uint8_t except_code)
+*/
+static void modbus_build_and_send_exception_response(uint8_t func_code, uint8_t except_code)
 {
-    uint8_t resp[5] = {0};
+    uint8_t resp[5]  = {0};
     uint8_t idx     = 0U;
+
+    char msg[LOG_MSG_MAX_LEN];
 
     // 1. Pack info
     resp[idx++] = MODBUS_SLAVE_ADDR;            // at 0
@@ -224,6 +233,17 @@ static void modbus_build_exception_response(uint8_t func_code, uint8_t except_co
     resp[idx++] = (uint8_t)(crc & 0xFFU);               // low byte
     resp[idx++] = (uint8_t)(crc >> 8U);                 // high byte
 
+    // Log exception response sent
+    char frame_log[LOG_MSG_MAX_LEN] = {0};
+    char temp[8] = {0};
+
+    snprintf(frame_log, sizeof(frame_log), "[T3] Exception response frame sent: ");
+    for (int i = 0; i < idx; i++) {
+        snprintf(temp, sizeof(temp), "%02X ", resp[i]);
+        strncat(frame_log, temp, sizeof(frame_log) - strlen(frame_log) - 1);
+    }
+    xQueueSend(xLogQueue, frame_log, 0U);
+
     modbus_send_response(resp, idx);
 }
 
@@ -232,7 +252,8 @@ static void modbus_build_exception_response(uint8_t func_code, uint8_t except_co
 */
 static void modbus_send_response(uint8_t *resp, uint8_t len)
 {
+    // Send one byte at a time
     for (uint8_t i = 0U; i < len; i++) {
-        uart1_write(resp[i]);               // Send one byte at a time
+        uart1_write(resp[i]);     
     }
 }

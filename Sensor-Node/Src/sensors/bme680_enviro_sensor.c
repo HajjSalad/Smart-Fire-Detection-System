@@ -28,11 +28,8 @@ static struct bme68x_dev bme = {0};
 /**
  * @brief SPI read callback for Bosch driver
 */
-static BME68X_INTF_RET_TYPE bme680_spi_read(uint8_t reg,
-                                            uint8_t *data,
-                                            uint32_t len,
-                                            void *intf_ptr)
-{
+static BME68X_INTF_RET_TYPE bme680_spi_read(uint8_t reg, uint8_t *data,
+                                            uint32_t len, void *intf_ptr) {
     (void)intf_ptr;
     spi1_read_regs(reg, data, (uint8_t)len);
     return BME68X_OK;
@@ -41,28 +38,20 @@ static BME68X_INTF_RET_TYPE bme680_spi_read(uint8_t reg,
 /**
  * @brief SPI write callback for Bosch driver
 */
-static BME68X_INTF_RET_TYPE bme680_spi_write(uint8_t reg,
-                                            const uint8_t *data,
-                                            uint32_t len,
-                                            void *intf_ptr)
-{
+static BME68X_INTF_RET_TYPE bme680_spi_write(uint8_t reg, const uint8_t *data,
+                                            uint32_t len, void *intf_ptr) {
     (void)intf_ptr;
-    for (uint32_t i = 0U; i < len; i++) {
-        spi1_write_reg(reg + (uint8_t)i, data[i]);
-    }
+    spi1_write_regs(reg, data, (uint8_t)len);
     return BME68X_OK;
 }
 
 /**
  * @brief Microsecond delay callback for Bosch driver
 */
-static void bme680_delay_us(uint32_t period_us, void *intf_ptr)
-{
+static void bme680_delay_us(uint32_t period_us, void *intf_ptr) {
     (void)intf_ptr;
     vTaskDelay(pdMS_TO_TICKS(period_us / 1000U));
 }
-
-
 
 /**
  * @brief Initialize BME680 via Bosch SensorAPI
@@ -72,10 +61,6 @@ static void bme680_delay_us(uint32_t period_us, void *intf_ptr)
 */
 BME680_Status_t bme680_init(void)
 {
-    uint8_t chip_id = spi1_read_reg(0xD0);
-    printf("BME680 chip ID: 0x%02X (expected 0x61)\n\r", chip_id);
-
-    printf("\rIn BME680 init\n\r");
     // Wire up HAL callbacks
     bme.read        = bme680_spi_read;
     bme.write       = bme680_spi_write;
@@ -88,7 +73,8 @@ BME680_Status_t bme680_init(void)
         printf("BME68x_init unsuccessful\n\r");
         return BME680_ERROR;
     }
-    printf("BME68x_init successful\n\r");
+    printf("BME68x_init successful.\n\r");
+
     return BME680_OK;
 }
 
@@ -134,7 +120,7 @@ BME680_Status_t bme680_read(float *temp, float *humi, float *pres, float *voc)
     ret = bme68x_set_op_mode(BME68X_FORCED_MODE, &bme);
     if (ret != BME68X_OK) return BME680_ERROR;
 
-    // Wait for measurement to complete */
+    // Wait for measurement to complete 
     delay_us = bme68x_get_meas_dur(BME68X_FORCED_MODE, &conf, &bme)
                + ((uint32_t)heatr.heatr_dur * 1000U);
     bme.delay_us(delay_us, bme.intf_ptr);

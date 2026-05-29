@@ -17,6 +17,7 @@
 #include "shared_resources.h"
 
 #define ANOMALY_DETECT_TASK_PERIOD_MS      (5000U)
+volatile uint8_t task2_alive = 0U;
 
 void vTaskAnomalyDetect(void *pvParameters)
 {
@@ -33,6 +34,8 @@ void vTaskAnomalyDetect(void *pvParameters)
         //     /* Log queue full — drop message */
         // }
         
+        task2_alive = 1U;       // Set alive flag
+
         // Sleep until next read cycle
         vTaskDelay(pdMS_TO_TICKS(ANOMALY_DETECT_TASK_PERIOD_MS));
     }

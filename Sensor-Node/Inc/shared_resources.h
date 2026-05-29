@@ -23,6 +23,8 @@ extern QueueHandle_t            xSensorQueue;
 #define LOG_QUEUE_DEPTH         (20U)
 extern QueueHandle_t            xLogQueue;
 
+extern TaskHandle_t xModbusTaskHandle;
+
 // Sensor data
 typedef struct {
     float    temp;       /* Temperature       : °C     — BME680    */
@@ -41,5 +43,11 @@ extern volatile uint8_t flame_detected;  /* Flame detection: 0/1 — GPIO */
 extern SensorData_t             shared_sensor_data;
 // Mutex to protect the shared struct between Task 1 and Modbus
 extern SemaphoreHandle_t        xSensorMutex;
+
+// IWDG Task Alive flags
+extern volatile uint8_t task1_alive;
+extern volatile uint8_t task2_alive;
+extern volatile uint8_t task3_alive;
+extern volatile uint8_t task4_alive;
 
 #endif  // SHARED_RESOURCES_H

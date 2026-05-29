@@ -3,6 +3,7 @@
  * @brief Sensor data reading task
 */
 
+#include "stm32f446xx.h"
 #include <stdint.h>
 
 #include "FreeRTOS.h"
@@ -16,6 +17,7 @@
 #include "shared_resources.h"
 
 #define SENSOR_READ_TASK_PERIOD_MS    (5000U)
+volatile uint8_t task1_alive = 0U;
 
 /**
  * @brief Sensor read task entry point
@@ -29,9 +31,7 @@ void vTaskSensorRead(void *pvParameters)
 {
     (void)pvParameters;                 // Suppress unused parameter warning
 
-    uint8_t chip_id = spi1_read_reg(0xD0);
-    printf("BME680 chip ID: 0x%02X (expected 0x61)\n\r", chip_id);
-    bme680_init();                      // Init BME680 - needs vTask for us hence here after scheduler
+    bme680_init();                      // Init BME680 - needs vTask for delay_us hence here after scheduler
 
     SensorData_t data = {0};
     char msg[LOG_MSG_MAX_LEN];
@@ -39,20 +39,6 @@ void vTaskSensorRead(void *pvParameters)
 
     while (1) 
     {
-        // snprintf(msg, sizeof(msg), "In Task 1");
-        // xRet = xQueueSend(xLogQueue, (const void *)msg, 0U);
-        // if (xRet != pdTRUE) {
-        //     /* Log queue full — drop message */
-        // }
-
-        // Test CS toggle manually
-        printf("CS going LOW\n\r");
-        spi1_cs_low();
-        vTaskDelay(pdMS_TO_TICKS(100));
-        printf("CS going HIGH\n\r");
-        spi1_cs_high();
-        vTaskDelay(pdMS_TO_TICKS(100));
-
         // 1. Sample all sensors
         bme680_read(&data.temp, &data.humi, &data.pres, &data.voc);
         gas_sensor_read(&data.co2);
@@ -79,6 +65,8 @@ void vTaskSensorRead(void *pvParameters)
 
         xQueueSend(xLogQueue, msg, 0U);
         
+        task1_alive = 1U;       // Set alive flag
+
         // Sleep until next read cycle
         vTaskDelay(pdMS_TO_TICKS(SENSOR_READ_TASK_PERIOD_MS));
     }

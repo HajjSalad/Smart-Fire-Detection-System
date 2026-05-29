@@ -17,6 +17,7 @@
 #include "shared_resources.h"
 
 #define LOGGER_TASK_PERIOD_MS      (5000U)
+volatile uint8_t task4_alive = 0U;
 
 void vTaskLogger(void *pvParameters)
 {
@@ -32,6 +33,8 @@ void vTaskLogger(void *pvParameters)
             msg[LOG_MSG_MAX_LEN - 1] = '\0';  // Ensure null termination
             printf("%s\n\r", msg);
         }
+
+        task4_alive = 1U;       // Set alive flag
     }
 }
 

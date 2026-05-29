@@ -69,7 +69,7 @@ void uart1_init(void)
 
 	USART1->CR1 = (CR1_TE | CR1_RE);	// Configure the transfer direction
 	USART1->CR1 |= CR1_RXNE;       		// Enable RXNE interrupt
-	NVIC_SetPriority(USART1_IRQn, 6);
+	NVIC_SetPriority(USART1_IRQn, 10);
 	NVIC_EnableIRQ(USART1_IRQn);     	// Enable USART1 in NVIC
 	USART1->CR1 |= CR1_UE;				// Enable USART Module
 }
@@ -118,14 +118,18 @@ void USART1_IRQHandler(void)
 	if (USART1->SR & SR_RXNE)
 	{
 		uint8_t byte = USART1->DR;
-
 		uint16_t next = (rHead + 1) % RING_BUFFER_SIZE;
 
-		if (next != rTail) 		// Buffer not full
-		{
+		if (next != rTail) {		// Buffer not full
 			rBuffer[rHead] = byte;
 			rHead = next;
 		}
+
+        if (xModbusTaskHandle != NULL) {
+            BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+            vTaskNotifyGiveFromISR(xModbusTaskHandle, &xHigherPriorityTaskWoken);
+            portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+        }
 	}
 }
 
