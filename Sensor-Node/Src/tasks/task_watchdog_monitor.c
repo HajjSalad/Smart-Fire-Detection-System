@@ -1,5 +1,5 @@
 /**
- * @file  task_watchdog_timer.c
+ * @file  task_watchdog_monitor.c
  * @brief Watchdog timer task
  * 
  * Highest priority task — verifies all other tasks are alive
@@ -29,7 +29,7 @@
  * Kicks IWDG if all flags set, logs fault and withholds
  * kick if any flag missing — triggering MCU reset via IWDG.
 */
-void vTaskWatchdogTimer(void *pvParameters)
+void vTaskWatchdogMonitor(void *pvParameters)
 {
     (void)pvParameters;                 // Suppress unused parameter warning
 
@@ -38,14 +38,14 @@ void vTaskWatchdogTimer(void *pvParameters)
 
     while (1) 
     {
-        snprintf(msg, sizeof(msg), "In Task WatchdogTimer");
-        xRet = xQueueSend(xLogQueue, (const void *)msg, 0U);
-        if (xRet != pdTRUE) {
-            /* Log queue full — drop message */
-        }
+        // snprintf(msg, sizeof(msg), "In Task WatchdogTimer");
+        // xRet = xQueueSend(xLogQueue, (const void *)msg, 0U);
+        // if (xRet != pdTRUE) {
+        //     /* Log queue full — drop message */
+        // }
 
         // Check all tasks are alive
-        if (task2_alive && task3_alive && task4_alive && task5_alive) 
+        if (task1_alive && task2_alive && task3_alive) 
         {
             iwdg_kick();            // Kick watchdog - all tasks healthy
 
@@ -55,14 +55,14 @@ void vTaskWatchdogTimer(void *pvParameters)
             task3_alive = 0U;
             task4_alive = 0U;
 
-            snprintf(msg, sizeof(msg), "[WDT] All tasks alive — kicked");
+            snprintf(msg, sizeof(msg), "[WDM] All tasks alive — kicked");
             xRet = xQueueSend(xLogQueue, (const void *)msg, 0U);
             if (xRet != pdTRUE) { /* drop */ }
         }
         else 
         {
             // Log which tasks responses
-            snprintf(msg, sizeof(msg), "[WDT] FAULT T1:%d T2:%d T3:%d T4:%d",
+            snprintf(msg, sizeof(msg), "[WDM] FAULT T1:%d T2:%d T3:%d T4:%d",
                      task1_alive, task2_alive, task3_alive, task4_alive);
             xRet = xQueueSend(xLogQueue, (const void *)msg, 0U);
             if (xRet != pdTRUE) { /* drop */ }

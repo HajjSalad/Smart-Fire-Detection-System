@@ -10,17 +10,19 @@ The project is organized into four components:
     
 ![overview](./overview.jpeg)
 ---
+
 ### 🟠 STM32 Sensor Node
-The FreeRTOS-based sensor node continuously samples environmental telemetry across multiple sensor interfaces, performs on-device anomaly detection, and responds to MODBUS RTU polling requests from the ESP32 Fire Alarm Control Panel over RS-485.
+The FreeRTOS-based sensor node continuously samples environmental telemetry across multiple sensor interfaces, performs on-device anomaly detection, and responds to MODBUS RTU polling requests from the ESP32 Fire Alarm Control Panel.   
 #### 🔬 Sensor Stack
 | Sensor | Measurement | Interface | Status |
 |---|---|---|---|
 | BME680 | Temperature, Humidity, Pressure, VOC | SPI1 | Real hardware |
-| Smoke Sensor | PM2.5 Particulate Matter | - | Simulated |
-| Gas Sensor | CO2 ppm | — | Simulated |
-| Flame Sensor | Flame detected / not detected | GPIO | Real hardware |
+| Smoke | PM2.5 Particulate Matter | - | Simulated |
+| Gas | CO2 ppm | - | Simulated |
+| Flame | Flame detected / not detected | GPIO | Real hardware |
+
 #### 📡 Peripheral Drivers
-**SPI1 - BME680**   
+**`SPI1` - BME680**   
 Bare-metal SPI1 driver with register-level reads. Full duplex master, Mode 0 (CPOL=0, CPHA=0), 1MHz clock. CS manually controlled via PC7 GPIO. Burst read using BME680 auto-increment register pointer.
 ```
 PB3 — SCK  (AF5)
@@ -28,13 +30,13 @@ PA7 — MOSI (AF5)
 PA6 — MISO (AF5)
 PC7 — CS   (GPIO output, active low)
 ```
-**UART1 - MODBUS**   
+**`UART1` - MODBUS**   
 Bare-metal UART1 driver at 115200 baud. ISR-driven ring buffer — ISR owns the head, `vTaskModbusSlave` owns the tail. Frame boundary detected via 3.5 character silence timeout (~2ms at 115200 baud).
 ```
 PA9  — TX (AF7)
 PA10 — RX (AF7)
 ```
-**UART2 - Debug Logging**   
+**`UART2` - Debug Logging**   
 Dedicated UART for terminal debug output. `vTaskSystemLogger` is the sole writer - drains `xLogQueue` and transmits log messages without blocking other tasks.
 ```
 PA2 - TX (AF7)

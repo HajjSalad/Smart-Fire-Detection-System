@@ -14,9 +14,8 @@ void spi1_init(void);
 void spi1_cs_low(void);
 void spi1_cs_high(void);
 uint8_t spi1_transmit_receive(uint8_t data);
-void spi1_write_reg(uint8_t reg, uint8_t data);
 void spi1_write_regs(uint8_t reg, const uint8_t *data, uint8_t len);
-uint8_t spi1_read_reg(uint8_t reg);
 void spi1_read_regs(uint8_t reg, uint8_t *buf, uint8_t len);
+void spi1_read_regs_dma(uint8_t reg, uint8_t *buf, uint8_t len);
 
 #endif  // SPI_DRIVER_H_

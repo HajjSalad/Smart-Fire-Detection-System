@@ -32,6 +32,7 @@ static BME68X_INTF_RET_TYPE bme680_spi_read(uint8_t reg, uint8_t *data,
                                             uint32_t len, void *intf_ptr) {
     (void)intf_ptr;
     spi1_read_regs(reg, data, (uint8_t)len);
+    //spi1_read_regs_dma(reg, data, (uint8_t)len);
     return BME68X_OK;
 }
 

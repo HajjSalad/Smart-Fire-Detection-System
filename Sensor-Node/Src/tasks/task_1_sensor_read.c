@@ -46,7 +46,7 @@ void vTaskSensorRead(void *pvParameters)
         data.flame = flame_detected;
         data.timestamp = xTaskGetTickCount();
 
-        // 2. Write to shared struct - shared with modbus slave
+        // 2. Write to shared struct - shared with vTaskModbusSlave (Task 3)
         if (xSemaphoreTake(xSensorMutex, pdMS_TO_TICKS(10)) == pdTRUE) {
             shared_sensor_data = data;
             xSemaphoreGive(xSensorMutex);
@@ -66,6 +66,11 @@ void vTaskSensorRead(void *pvParameters)
         xQueueSend(xLogQueue, msg, 0U);
         
         task1_alive = 1U;       // Set alive flag
+        snprintf(msg, sizeof(msg), "[T1] Sent alive heartbeat");
+        xRet = xQueueSend(xLogQueue, (const void *)msg, 0U);
+        if (xRet != pdTRUE) {
+            /* Log queue full — drop message */
+        }
 
         // Sleep until next read cycle
         vTaskDelay(pdMS_TO_TICKS(SENSOR_READ_TASK_PERIOD_MS));

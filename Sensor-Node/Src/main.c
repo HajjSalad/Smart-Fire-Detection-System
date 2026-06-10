@@ -17,6 +17,7 @@
 
 #include "tasks.h"
 #include "sensor_drivers.h"
+#include "dma2_driver.h"
 #include "spi_driver.h"
 #include "exti_driver.h"
 #include "uart_driver.h"
@@ -75,7 +76,8 @@ int main(void)
     spi1_init();                //
     uart1_init();               // Initialize UART1 for ESP32 communication
     exti_init();                // Init the input interrupts for flame sensor
-    //iwdg_init();
+    iwdg_init();
+    dma2_init();
 
     check_reset_cause();        // Log the cause of the last reset
 
@@ -103,15 +105,15 @@ int main(void)
     */
 
     // Create task
-    xRet = xTaskCreate(vTaskWatchdogTimer, "WatchdogTimer", 512, NULL, 7, NULL);
+    xRet = xTaskCreate(vTaskWatchdogMonitor, "WatchdogMonitor", 1024, NULL, 7, NULL);
     configASSERT(xRet == pdPASS);
-    xRet = xTaskCreate(vTaskSensorRead,    "SensorRead",    2048, NULL, 6, NULL);
+    xRet = xTaskCreate(vTaskSensorRead,       "SensorRead",     4096, NULL, 6, NULL);
+    configASSERT(xRet == pdPASS); 
+    xRet = xTaskCreate(vTaskAnomalyDetect,    "AnomalyDetect",  512, NULL, 5, NULL);
     configASSERT(xRet == pdPASS);
-    xRet = xTaskCreate(vTaskAnomalyDetect, "AnomalyDetect", 512, NULL, 5, NULL);
+    xRet = xTaskCreate(vTaskModbusSlave,       "ModbusSlave",   1024, NULL, 4, &xModbusTaskHandle);
     configASSERT(xRet == pdPASS);
-    xRet = xTaskCreate(vTaskModbusSlave,    "ModbusSlave",  1024, NULL, 4, &xModbusTaskHandle);
-    configASSERT(xRet == pdPASS);
-    xRet = xTaskCreate(vTaskLogger,         "Logger",       512, NULL, 3, NULL);
+    xRet = xTaskCreate(vTaskLogger,            "Logger",        512, NULL, 3, NULL);
     configASSERT(xRet == pdPASS);
 
     LOG("Tasks created. Free heap: %u bytes", xPortGetFreeHeapSize());

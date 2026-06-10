@@ -14,6 +14,7 @@
 #include "string.h"
 #include "stdio.h"
 
+#include "alert_gpio.h"
 #include "modbus_master.h"
 
 static const char *TAG = "MAIN";
@@ -43,6 +44,8 @@ void app_main()
      * Priority 4  → Modbus Master
      * Priority 0  → Idle task
     */
+
+    ESP_ERROR_CHECK(alert_gpio_init()); 
 
     // Create tasks
     modbus_master_task_init();             // Priority: 4

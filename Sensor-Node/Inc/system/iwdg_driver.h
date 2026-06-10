@@ -11,5 +11,6 @@
 
 // Function Prototypes
 void iwdg_init(void);
+void iwdg_kick(void);
 
 #endif  // IWDG_DRIVER_H_

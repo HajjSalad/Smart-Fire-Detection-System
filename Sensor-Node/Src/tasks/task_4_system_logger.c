@@ -34,7 +34,12 @@ void vTaskLogger(void *pvParameters)
             printf("%s\n\r", msg);
         }
 
-        task4_alive = 1U;       // Set alive flag
+       // task4_alive = 1U;       // Set alive flag
+        // snprintf(msg, sizeof(msg), "[T4] Sent alive heartbeat");
+        // ret = xQueueSend(xLogQueue, (const void *)msg, 0U);
+        // if (ret != pdTRUE) {
+        //     /* Log queue full — drop message */
+        // }
     }
 }
 

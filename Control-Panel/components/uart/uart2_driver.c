@@ -1,5 +1,5 @@
 /**
- * @file uart2_driver.c
+ * @file  uart2_driver.c
  * @brief
  * 
 */

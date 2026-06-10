@@ -25,10 +25,10 @@ void iwdg_init()
 {
     // 1. Start LSI oscillator
     RCC->CSR |= RCC_CSR_LSION;
-    while(!(RCC->CSR && RCC_CSR_LSIRDY));       // wait until LSI stable
+    while(!(RCC->CSR & RCC_CSR_LSIRDY));       // wait until LSI stable
 
     // 2. Unlock PR and RLR registers
-    IWDG->KR |= IWDG_KEY_UNLOCK;
+    IWDG->KR = IWDG_KEY_UNLOCK;
 
     // 3. Set prescaler - /256
     IWDG->PR = 6U;
@@ -36,10 +36,7 @@ void iwdg_init()
     // 4. Set reload value - 1250
     IWDG->RLR = IWDG_RELOAD;
 
-    // 5. Wait until registers update
-    while(IWDG->SR != 0U);                      // Both RVU and PVU are updated
-
-    // 6. Start IWDG
+    // 5. Start IWDG
     IWDG->KR = IWDG_KEY_START;
 }
 

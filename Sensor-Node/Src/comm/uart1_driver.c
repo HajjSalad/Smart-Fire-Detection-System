@@ -125,6 +125,9 @@ void USART1_IRQHandler(void)
 			rHead = next;
 		}
 
+		/**
+		 * vTaskModbusSlave is notified on each byte arrival - 8 ISRs in total
+		*/
         if (xModbusTaskHandle != NULL) {
             BaseType_t xHigherPriorityTaskWoken = pdFALSE;
             vTaskNotifyGiveFromISR(xModbusTaskHandle, &xHigherPriorityTaskWoken);

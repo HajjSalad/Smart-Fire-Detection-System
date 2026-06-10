@@ -13,6 +13,7 @@ C_SOURCES = $(wildcard Src/*.c) \
 			$(wildcard Src/comm/*.c) \
 			$(wildcard Src/tasks/*.c) \
             $(wildcard Src/utils/*.c) \
+			$(wildcard Src/system/*.c) \
 			$(wildcard Src/sensors/*.c) \
             $(wildcard FreeRTOS/Source/*.c) \
             $(wildcard FreeRTOS/Source/portable/GCC/ARM_CM4F/*.c) \

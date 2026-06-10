@@ -6,6 +6,7 @@
 *.elf
 
 # Ignore build directories
+/Sensor-Node-Bootloader/
 /Control-Panel/build/
 /Control-Panel/sdkconfig
 /Sensor-Node/build

@@ -143,3 +143,56 @@ void spi1_read_regs(uint8_t reg, uint8_t *buf, uint8_t len)
 
     spi1_cs_high();
 }
+
+void spi1_read_regs_dma(uint8_t reg, uint8_t *buf, uint8_t len)
+{
+    static uint8_t dummy = 0x00;
+    spi1_cs_low();
+
+    // 1. Send register address via CPU - single byte
+    spi1_transmit_receive(reg);
+
+    // 2. Configure DMA RX - Stream 0 (SPI1->DR to buf, periph-to-memory)
+    DMA2_Stream0->CR &=~ DMA_SxCR_EN;
+    while (DMA2_Stream0->CR & DMA_SxCR_EN);     // wait until disabled
+
+    DMA2->LIFCR |= DMA_LIFCR_CTCIF0 | DMA_LIFCR_CHTIF0 |
+                   DMA_LIFCR_CTEIF0 | DMA_LIFCR_CDMEIF0 |
+                   DMA_LIFCR_CFEIF0;
+
+    DMA2_Stream0->M0AR  = (uint32_t)buf;     // destination: buffer
+    DMA2_Stream0->NDTR = len;                // number of bytes
+
+    // 3. Configure DMA TX — Stream 3 (dummy to SPI1->DR, memory-to-periph)
+    DMA2_Stream3->CR  &=~ DMA_SxCR_EN;
+    while (DMA2_Stream3->CR & DMA_SxCR_EN);
+
+    DMA2->LIFCR |= DMA_LIFCR_CTCIF3 | DMA_LIFCR_CHTIF3 |
+                   DMA_LIFCR_CTEIF3 | DMA_LIFCR_CDMEIF3 |
+                   DMA_LIFCR_CFEIF3;
+
+    DMA2_Stream3->M0AR  = (uint32_t)&dummy;    // source: dummy byte
+    DMA2_Stream3->NDTR = len;                  // number of bytes
+
+    // No memory increment - same dummy byte repeated
+    DMA2_Stream3->CR &=~ DMA_SxCR_MINC;    
+    
+    // 4. Enable SPI RX & TX DMA requests
+    SPI1->CR2 |= SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN;
+
+    // 5. Enable both DMA streams
+    DMA2_Stream0->CR |= DMA_SxCR_EN;
+    DMA2_Stream3->CR |= DMA_SxCR_EN;
+
+    // 6. Wait for RX transfer complete
+    while (!(DMA2->LISR & DMA_LISR_TCIF0));
+
+    // 7. Disable both DMA streams
+    DMA2_Stream0->CR &=~ DMA_SxCR_EN;
+    DMA2_Stream3->CR &=~ DMA_SxCR_EN;
+
+    // 8. Disable SPI DMA requests
+    SPI1->CR2 &=~ (SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN);
+
+    spi1_cs_high();
+}

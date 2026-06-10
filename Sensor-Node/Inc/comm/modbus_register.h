@@ -63,4 +63,9 @@
 #define SLAVE_ADDR_POS              0
 #define FC_ADDR_POS                 1
 
+typedef enum {
+    MODBUS_OK    = 0,
+    MODBUS_ERROR = 1
+} Modbus_Status_t;
+
 #endif
