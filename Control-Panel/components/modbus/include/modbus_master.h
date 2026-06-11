@@ -34,8 +34,8 @@ typedef enum {
 } Modbus_Master_State_t;
 
 typedef enum {
-    MODBUS_OK    = 0,
-    MODBUS_ERROR = 1,
+    MODBUS_MASTER_OK    = 0,
+    MODBUS_MASTER_ERROR = 1,
 } Modbus_Master_Status_t;
 
 #endif      // MODBUS_MASTER_H_

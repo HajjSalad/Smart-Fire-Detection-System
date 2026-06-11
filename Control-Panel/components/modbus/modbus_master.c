@@ -33,29 +33,32 @@ static void modbus_master_task(void *pvParameters)
         .state    = MODBUS_MASTER_STATE_IDLE,
     };
 
-    Basetype_t ret;
-
     while(1) 
     {
         switch(mctx.state) 
         {
             case MODBUS_MASTER_STATE_IDLE:
-                // Build read request 
-                if (modbus_build_read_request(&mctx) != MODBUS_OK) {
-                    printf("Error building read request\n");
-                    mctx.state = MODBUS_MASTER_STATE_ERROR;
-                }
+                // Reset context for new transaction
+                memset(&mctx, 0, sizeof(mctx));
                 mctx.state = MODBUS_MASTER_STATE_REQUESTING;
                 break;
 
             case MODBUS_MASTER_STATE_REQUESTING:
-                // Send read request
-                if (uart_write_bytes(UART_NUM2, mctx.request, mctx.req_len) != mctx.req_len) {
+                // Build read request 
+                if (modbus_build_read_request(&mctx) != MODBUS_MASTER_OK) {
+                    printf("Error building read request\n");
+                    mctx.state = MODBUS_MASTER_STATE_ERROR;
+                    break;
+                }
+
+                // Transmit read request
+                int written = uart_write_bytes(UART_NUM2, mctx.request, mctx.req_len);
+                if (written != (int)mctx.req_len) {
                     printf("Error sending read request\n");
                     mctx.state = MODBUS_MASTER_STATE_ERROR;
                 }
 
-                // Print request frame sent
+                // Log request frame sent
                 printf("Request frame sent: ");
                 for (int i = 0; i < req_len; i++) {
                     printf("%02X ", request[i]);
@@ -66,79 +69,51 @@ static void modbus_master_task(void *pvParameters)
                 break;
 
             case MODBUS_MASTER_STATE_WAITING:
-                // wait for response
-                printf("Request sent - waiting for response...\n");
+                // Block until response received or timeout
+                int received = uart_read_bytes(UART_NUM2, mctx.response, mctx.resp_len,
+                                        pdMS_TO_TICKS(MODBUS_RESPONSE_TIMEOUT_MS));
+                if (received <= 0) {
+                    printf("Timeout - no response from slave\n\n");
+                    mctx.state = MODBUS_MASTER_STATE_ERROR;
+                    break;
+                }
+
+                mctx.resp_len = (uint8_t)received;
+                mctx.state    = MODBUS_MASTER_STATE_PROCESSING;
                 break;
 
             case MODBUS_MASTER_STATE_PROCESSING:
-                mctx.resp_len = uart_read_bytes(UART_NUM2, mctx.response, mctx.resp_len,
-                                        pdMS_TO_TICKS(MODBUS_RESPONSE_TIMEOUT_MS));
-
-                if (mctx.resp_len <= 0) {
-                    printf("Timeout - no response from slave\n\n");
+                // Validate and parse response
+                if (modbus_parse_received_response(&mctx) != MODBUS_MASTER_OK) {
                     mctx.state = MODBUS_MASTER_STATE_ERROR;
-                }
-
-                // parse response
-                if (modbus_parse_received_response(&mctx) != MODBUS_OK) {
-                    mctx.state = MODBUS_MASTER_STATE_ERROR;
+                    break;
                 }
 
                 mctx.state = MODBUS_MASTER_STATE_COMPLETE;
                 break;
 
             case MODBUS_MASTER_STATE_COMPLETE:
-                // Reset context
-                memcpy(mctx, 0, sizeof(mctx));
-                mctx.state = MODBUS_MASTER_STATE_IDLE;
-
                 printf("Transaction Complete !\n");
+
+                // Delay before next cycle
+                vTaskDelay(pdMS_TO_TICKS(MODBUS_MASTER_SAMPLE_PERIOD));
+                mctx.state = MODBUS_MASTER_STATE_IDLE;
+                
                 break;
 
             case MODBUS_MASTER_STATE_ERROR:
-                // Reset context
-                memcpy(mctx, 0, sizeof(mctx));
+                printf("MODBUS master error - retrying next cycle !\n"); 
+
+                // Delay before retry
+                vTaskDelay(pdMS_TO_TICKS(MODBUS_MASTER_SAMPLE_PERIOD));
                 mctx.state = MODBUS_MASTER_STATE_IDLE;
 
-                printf("Modbus master error\n");
                 break;
 
             default:
                 mctx.state = MODBUS_MASTER_STATE_IDLE;
                 break;
         }
-
-        // Sleep until next read cycle
-        vTaskDelay(pdMS_TO_TICKS(MODBUS_MASTER_SAMPLE_PERIOD));
-
-        // // 1. Build request frame
-        // req_len = modbus_build_read_request(request);
-
-        // // Print request frame sent
-        // printf("Request frame sent: ");
-        // for (int i = 0; i < req_len; i++) {
-        //     printf("%02X ", request[i]);
-        // }
-        // printf("\n");
-
-        // // 2. Send request to STM32
-        // uart_write_bytes(UART_NUM2, request, req_len);
-        // printf("Request sent - waiting for response...\n");
-
-        // // 3. Wait for response
-        // memset(response, 0, sizeof(response));
-        // byte_received = uart_read_bytes(UART_NUM2, response, sizeof(response),
-        //                                 pdMS_TO_TICKS(MODBUS_RESPONSE_TIMEOUT_MS));
-
-        // // 4. Parse response
-        // if (byte_received > 0) {
-        //     modbus_parse_received_response(response, (uint8_t)byte_received);
-        // } else {
-        //     printf("Timeout - no response from slave\n\n");
-        // }
-
-        // // 5. Sleep until next read cycle
-        // vTaskDelay(pdMS_TO_TICKS(MODBUS_MASTER_SAMPLE_PERIOD));
     }
 }
 /**
@@ -157,11 +132,11 @@ Modbus_Master_Status_t modbus_build_read_request(Modbus_Master_Context_t *mctx)
     mctx->request[mctx->req_len++] = (uint8_t)(MODBUS_REG_COUNT & 0xFFU);   // at 5 - quantity - low
 
     // Append CRC
-    uint16_t crc   = compute_crc(request, idx);
+    uint16_t crc   = compute_crc(mctx->request, mctx->req_len);
     mctx->request[mctx->req_len++] = (uint8_t)(crc & 0xFFU);        // low byte
     mctx->request[mctx->req_len++] = (uint8_t)(crc >> 8U);          // high byte
 
-    return MODBUS_OK;
+    return MODBUS_MASTER_OK;
 }
 
 /**
@@ -177,38 +152,38 @@ Modbus_Master_Status_t modbus_parse_received_response(Modbus_Master_Context_t *m
     // 1. Minimum reponse is exception: addr(1) + fc(1) + except(1) + crc(2) = 5
     if (len < RESPONSE_MIN_FRAME_LEN) {
         printf("Response too short: %d bytes\n", len);
-        return MODBUS_ERROR;
+        return MODBUS_MASTER_ERROR;
     }
 
     // 2. Validate slave addr
     if (mctx->response[SLAVE_ADDR_POS] != MODBUS_SLAVE_ADDR) {
-        printf("Wrong slave address: 0x%02X\n", mctx->response[0]);
-        return MODBUS_ERROR;
+        printf("Wrong slave address: 0x%02X\n", mctx->response[SLAVE_ADDR_POS]);
+        return MODBUS_MASTER_ERROR;
     }
 
     // 3. Check for exception response - FC has MSB set
     if (mctx->response[FC_ADDR_POS] & 0x80U) {
         printf("Slave exception: 0x%02X\n", mctx->response[EX_ADDR_POS]);
-        return MODBUS_OK;
+        return MODBUS_MASTER_OK;
     }
 
     // 4. Validate CRC
     uint16_t crc_received   = (uint16_t)(mctx->response[len-2]) | ((uint16_t)(mctx->response[len-1]) << 8U);
-    uint16_t crc_calculated = compute_crc(response, len - 2U);
+    uint16_t crc_calculated = compute_crc(mctx->response, len - 2U);
     if (crc_received != crc_calculated) {
         printf("CRC failed — rx:0x%04X calc:0x%04X\n", crc_received, crc_calculated);
-        return MODBUS_ERROR;
+        return MODBUS_MASTER_ERROR;
     }
 
     // Print response frame received
     printf("Response frame received: ");
     for (int i = 0; i < len; i++) {
-        printf("%02X ", response[i]);
+        printf("%02X ", mctx->response[i]);
     }
     printf("\n");
 
     // 5. Extract register values - big endian, starting at byte 3
-    uint8_t *data = &response[3];
+    uint8_t *data = &mctx->response[3];
 
     uint16_t raw_temp  = ((uint16_t)data[0]  << 8U) | data[1];
     uint16_t raw_humi  = ((uint16_t)data[2]  << 8U) | data[3];
@@ -238,7 +213,7 @@ Modbus_Master_Status_t modbus_parse_received_response(Modbus_Master_Context_t *m
     ESP_LOGI(TAG, "Flame       : %s",         flame ? "DETECTED" : "None");
     ESP_LOGI(TAG, "──────────────────────────────────");
 
-    return MODBUS_OK;
+    return MODBUS_MASTER_OK;
 }
 
 void modbus_master_task_init(void) 
