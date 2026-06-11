@@ -110,23 +110,23 @@ The MODBUS RTU protocol stack is implemented entirely from scratch in C. The STM
 Six-state FSM in `vTaskModbusSlave`. Task blocks on `ulTaskNotifyTake` between frames - zero CPU at idle. `UART1` ISR notifies task on each incoming byte via `vTaskNotifyGiveFromISR`.
 | FC | Name |
 |---|---|
-| IDLE | Blocked on task notification |
-| RECEIVING | Drains ring buffer, detects 2ms silence gap |
-| PROCESSING | Validates length, address, CRC-16 |
-| RESPONDING | Reads shared_sensor_data, builds and transmits response |
-| RESPONDED | Resets context, sets task3_alive watchdog flag |
-| ERROR | Discards frame, resets context |
+| `IDLE` | Blocked on task notification |
+| `RECEIVING` | Drains ring buffer, detects 2ms silence gap |
+| `PROCESSING` | Validates length, address, CRC-16 |
+| `RESPONDING` | Reads shared_sensor_data, builds and transmits response |
+| `RESPONDED` | Resets context, sets task3_alive watchdog flag |
+| `ERROR` | Discards frame, resets context |
 
 #### Master State Machine
 Five-state FSM in `modbus_master_task` on ESP32. Polls slave every 5000ms.
 | FC | Name |
 |---|---|
-| IDLE | Resets context via memset, transitions immediately to REQUESTING |
-| REQUESTING | Builds FC 0x03 frame, transmits over UART2 via uart_write_bytes |
-| PROCESSING | Blocks on uart_read_bytes with 1000ms timeout — transitions to PROCESSING or ERROR |
-| RESPONDING | Validates CRC, checks slave address, scales registers to physical values |
-| RESPONDED | Logs transaction complete, delays 5000ms before next cycle |
-| ERROR | Logs fault, delays 5000ms before retry |
+| `IDLE` | Resets context via memset, transitions immediately to REQUESTING |
+| `REQUESTING` | Builds FC 0x03 frame, transmits over UART2 via uart_write_bytes |
+| `PROCESSING` | Blocks on uart_read_bytes with 1000ms timeout - transitions to `PROCESSING` or `ERROR` |
+| `RESPONDING` | Validates CRC, checks slave address, scales registers to physical values |
+| `RESPONDED` | Logs transaction complete, delays 5000ms before next cycle |
+| `ERROR` | Logs fault, delays 5000ms before retry |
 
 ---
 
