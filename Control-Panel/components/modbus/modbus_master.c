@@ -213,7 +213,7 @@ Modbus_Master_Status_t modbus_parse_received_response(Modbus_Master_Context_t *m
     ESP_LOGI(TAG, "Flame       : %s",         flame ? "DETECTED" : "None");
     ESP_LOGI(TAG, "──────────────────────────────────");
 
-    return MODBUS_MASTER_OK;
+    return MODBUS_OK;
 }
 
 void modbus_master_task_init(void) 

@@ -88,7 +88,45 @@ Timeout    = (256 × 1250) / 32000 = 10 seconds
 
 ---
 ### 🔵 MODBUS RTU
+The MODBUS RTU protocol stack is implemented entirely from scratch in C. The STM32 sensor node operates as a slave, ESP32 FACP operates as a master. The master polls the slave every 5000ms.
+#### Register Map
+| Address | Register | Unit | Scale | Example |
+|---|---|---|---|---|
+| 0x0000 | Temperature | °C | × 100 | 2631 = 26.31°C |
+| 0x0001 | Humidity | %RH | × 100 | 4047 = 40.47% |
+| 0x0002 | Pressure | hPa | × 10 | 10072 = 1007.2hPa |
+| 0x0003 | VOC | Ω | × 1 | 147 = 147Ω |
+| 0x0004 | CO2 | ppm | × 1 | 412 = 412ppm |
+| 0x0005 | PM2.5 | µg/m³ | × 10 | 85 = 8.5µg/m³ |
+| 0x0006 | Flame | 0/1 | × 1 | 1 = detected |
 
+#### Function Codes
+| FC | Name | Direction |
+|---|---|---|
+| 0x03 | Read Holding Registers | ESP32 reads sensor telemetry from STM32 |
+| 0x06 | Write Single Register | ESP32 writes to STM32 (future) |
+
+#### Slave State Machine
+Six-state FSM in `vTaskModbusSlave`. Task blocks on `ulTaskNotifyTake` between frames - zero CPU at idle. `UART1` ISR notifies task on each incoming byte via `vTaskNotifyGiveFromISR`.
+| FC | Name |
+|---|---|
+| IDLE | Blocked on task notification |
+| RECEIVING | Drains ring buffer, detects 2ms silence gap |
+| PROCESSING | Validates length, address, CRC-16 |
+| RESPONDING | Reads shared_sensor_data, builds and transmits response |
+| RESPONDED | Resets context, sets task3_alive watchdog flag |
+| ERROR | Discards frame, resets context |
+
+#### Master State Machine
+Five-state FSM in `modbus_master_task` on ESP32. Polls slave every 5000ms.
+| FC | Name |
+|---|---|
+| IDLE | Resets context via memset, transitions immediately to REQUESTING |
+| REQUESTING | Builds FC 0x03 frame, transmits over UART2 via uart_write_bytes |
+| PROCESSING | Blocks on uart_read_bytes with 1000ms timeout — transitions to PROCESSING or ERROR |
+| RESPONDING | Validates CRC, checks slave address, scales registers to physical values |
+| RESPONDED | Logs transaction complete, delays 5000ms before next cycle |
+| ERROR | Logs fault, delays 5000ms before retry |
 
 ---
 
@@ -101,19 +139,27 @@ The ESP32 firmware is organized into ESP-IDF components - self-contained modules
 |---|---|
 | `modbus` | MODBUS master task, frame construction, CRC-16, response parsing |
 | `uart` | UART2 peripheral driver for RS-485 communication with STM32 nodes |
+| `alert` | GPIO4 interrupt handler - notifies master task on anomaly detection |
 
-#### 📡 Peripheral Drivers
-**UART2 - MODBUS RTU**    
+#### 📡 Peripheral Drivers 
+**UART2 - MODBUS RTU**     
 ESP-IDF UART driver at 115200 baud. Master sends FC 0x03 read requests to STM32 slave nodes and receives sensor telemetry responses. Response timeout configurable per poll cycle.
 ```
 GPIO17 — TX
 GPIO16 — RX
 ```
+**GPIO4 - Anomaly Alert Input**      
+Configured as digital inout with rising edge interrupt. STM32 PB10 drives this pin HIGH when `vTaskAnomalyDetect` in sensor node breaches a threshold. 
+```
+GPIO4 — Digital input (rising edge interrupt)
+        HIGH → anomaly detected on sensor node → urgent poll triggered
+        LOW  → normal operation
+```
 #### 🧵 Task Model
 | Task | Priority | Responsibility |
 |---|---|---|
 | `modbus_master_task` | 4 | Builds MODBUS requests, polls STM32 nodes, validates CRC, parses response, logs telemetry |
-| `vTaskLogger` | 1 | Sole consumer of `xLogQueue` — drains and prints all log messages to UART terminal |
+| `vTaskLogger` | 1 | Sole consumer of `xLogQueue` - drains and prints all log messages to UART terminal |
 ---
 ### 🟢 Sensor Node PCB Design
 A custom `STM32F446RETx` sensor node PCB designed in KiCad.
