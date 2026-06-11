@@ -180,12 +180,17 @@ A custom `STM32F446RETx` sensor node PCB designed in KiCad.
 │   ├── 📁 Src/                              (Source files)
 │   │   ├── 📄 main.c                        (Entry point, FreeRTOS scheduler init)
 │   │   ├── 📄 syscalls.c                    (System call stubs)
+│   │   ├── 📁 system/                      
+│   │   │   └── 📄 iwdg_driver.c
 │   │   ├── 📁 comm/                         (Communication driver implementations)
-│   │   │   ├── 📄 i2c1_driver.c
+│   │   │   ├── 📄 exti_driver.c
 │   │   │   ├── 📄 spi1_driver.c
+│   │   │   ├── 📄 dma2_driver.c
 │   │   │   ├── 📄 uart1_driver.c
-│   │   │   └── 📄 uart2_driver.c
+│   │   │   ├── 📄 uart2_driver.c
+│   │   │   └── 📄 alert_pin_driver.c
 │   │   ├── 📁 sensors/                      (Sensor driver implementations)
+│   │   │   ├── 📄 bme68x.c
 │   │   │   ├── 📄 bme680_enviro_sensor.c
 │   │   │   ├── 📄 button_flame_sensor.c
 │   │   │   ├── 📄 simulate_smoke_sensor.c
@@ -194,7 +199,8 @@ A custom `STM32F446RETx` sensor node PCB designed in KiCad.
 │   │   │   ├── 📄 task_1_sensor_read.c
 │   │   │   ├── 📄 task_2_anomaly_detect.c
 │   │   │   ├── 📄 task_3_modbus_slave.c
-│   │   │   └── 📄 task_4_system_logger.c
+│   │   │   ├── 📄 task_4_system_logger.c
+│   │   │   └── 📄 task_5_watchdog_monitor.c
 │   │   └── 📁 utils/                        (Utility implementations)
 │   │       ├── 📄 crc_16.c
 │   │       └── 📄 demo.cpp
