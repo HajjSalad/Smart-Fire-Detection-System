@@ -8,7 +8,7 @@ The project is organized into four components:
 - 🔴 **ESP32 Fire Alarm Control Panel** - MODBUS master polling, and cloud gateway
 - 🟢 **Sensor Node PCB Design** - KiCad schematic for a custom sensor node PCB with v1/v2 revision roadmap    
     
-![overview](./overview_diagram.png)
+![overview](./project_diagram.png)
 
 ---
 
