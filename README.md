@@ -17,10 +17,10 @@ The FreeRTOS-based sensor node continuously samples environmental telemetry acro
 #### 🔬 Sensor Stack
 | Sensor | Measurement | Interface | Status |
 |---|---|---|---|
-| BME680 | Temperature, Humidity, Pressure, VOC | SPI1 | Real hardware |
+| BME680 | Temperature, Humidity, Pressure, VOC | SPI1 + DMA2 | Real hardware |
 | Smoke | PM2.5 Particulate Matter | - | Simulated |
 | Gas | CO2 ppm | - | Simulated |
-| Flame | Flame detected / not detected | GPIO | Real hardware |
+| Flame | Flame detected / not detected | GPIO Input | Real hardware |
 
 #### 📡 Peripheral Drivers
 **`SPI1` - BME680**   
@@ -31,26 +31,26 @@ PA7 — MOSI (AF5)
 PA6 — MISO (AF5)
 PC7 — CS   (GPIO output, active low)
 ```
-**`DMA2`- SPI1 burst reads**
+**`DMA2`- SPI1 burst reads**   
 DMA2 configured for SPI1 RX/TX to offload BME680 burst reads from the CPU. Register address sent via CPU (single byte), then DMA handles the multi-byte data transfer. TX stream sends dummy bytes to generate clock; RX stream captures BME680 response into buffer simultaneously.
 ```
 Stream 0, Channel 3 - SPI1 RX (peripheral → memory, MINC enabled)
 Stream 3, Channel 3 - SPI1 TX (memory → peripheral, MINC disabled — same dummy byte repeated)
 ```
 **`UART1` - MODBUS RTU**   
-Bare-metal UART1 driver at 115200 baud. ISR-driven ring buffer — ISR owns the head, `vTaskModbusSlave` owns the tail. Frame boundary detected via 3.5 character silence timeout (~2ms at 115200 baud).
+Bare-metal UART1 driver at 115200 baud. ISR-driven ring buffer - ISR owns the head, `vTaskModbusSlave` owns the tail. Frame boundary detected via 3.5 character silence timeout (~2ms at 115200 baud).
 ```
 PA9  — TX (AF7)
 PA10 — RX (AF7)
 ```
-**`GPIO Input` - Flame Sensor**
+**`GPIO Input` - Flame Sensor**    
 PB13 configured as digital input with internal pull-up resistor. EXTI13 interrupt on both falling and rising edges. Active LOW — button/sensor pulls pin LOW on flame detection. Falling edge sets `volatile uint8_t flame_detected = 1`, rising edge clears it. Task 1 reads flag each 5 second cycle alongside other sensors — no polling required.
 ```
 PB13 - Digital input (pull-up, EXTI13)
        Falling edge -> flame_detected = 1
        Rising edge  -> flame_detected = 0
 ```
-**`GPIO Output` - Anomaly Alert**
+**`GPIO Output` - Anomaly Alert**    
 PB10 configured as GPIO output, idle LOW. Driven HIGH by `vTaskAnomalyDetect` when any sensor reading breaches a threshold. ESP32 `GPIO4` monitors this pin via rising edge interrupt — triggers an immediate urgent MODBUS poll rather than waiting for the next 5 second cycle.
 ```
 PB10 — Digital output (active HIGH)
@@ -63,7 +63,7 @@ Dedicated UART for terminal debug output. `vTaskSystemLogger` is the sole writer
 PA2 - TX (AF7)
 PA3 - RX (AF7)
 ```
-**`IWDG` - Independent Watchdog**
+**`IWDG` - Independent Watchdog**    
 Hardware watchdog clocked by internal LSI oscillator (32kHz) — independent of system clock, cannot be disabled once started. `vTaskWatchdogMonitor` (Pri 7, highest) verifies all four tasks set their alive flags each cycle before kicking. If any task hangs and fails to set its flag — kick is withheld and MCU resets after timeout.
 ```
 Prescaler  = /256  (PR = 6)
@@ -78,35 +78,20 @@ Timeout    = (256 × 1250) / 32000 = 10 seconds
 | `vTaskAnomalyDetect` | 5 | Blocks on `xSensorDataQueue`, checks readings against thresholds, raises alert flag |
 | `vTaskModbusSlave` | 4 | Polls UART ring buffer, parses MODBUS frames, reads `shared_sensor_data`, sends response |
 | `vTaskSystemLogger` | 3 | Sole consumer of `xLogQueue` - drains and prints all log messages to UART terminal |
-| `vTaskWatchdogMonitor` | 7 | Checks alive flags from all tasks every 10s — kicks IWDG if all healthy, withholds kick if any task hung |
+| `vTaskWatchdogMonitor` | 7 | Checks alive flags from all tasks every 10s - kicks IWDG if all healthy, withholds kick if any task hung |
 #### 🔗 FreeRTOS Resources
 | Resource | Type | Purpose |
 |---|---|---|
 | `xSensorDataMutex` | Mutex | Guards `shared_sensor_data` between `vTaskSensorRead` and `vTaskModbusSlave` |
 | `xSensorDataQueue` | Queue | Passes `SensorData_t` from `vTaskSensorRead` → `vTaskAnomalyDetect` |
 | `xLogQueue` | Queue | Passes log strings from all tasks → `vTaskSystemLogger` |
-#### 🔀 Data Flow
-```
-┌──────────────────┐                                               ┌──────────────────┐
-│ vTaskSensorRead  │─── writes ───→ shared_sensor_data ←── reads ──  vTaskModbusSlave
-└────────┬─────────┘                                               └──────────────────┘
-         │ pushes SensorData_t
-         ▼
-┌────────────────────┐
-│ xSensorDataQueue   │
-└────────┬───────────┘
-         │ blocks on
-         ▼
-┌──────────────────────┐
-│ vTaskAnomalyDetect   │─── raises ──→ anomaly_flag
-└──────────────────────┘
 
-All tasks ──→ xLogQueue ──→ vTaskSystemLogger ──→ UART terminal
-```
 ---
 ### 🔵 MODBUS RTU
 
+
 ---
+
 ### 🔴 ESP32 Fire Alarm Control Panel
 The ESP-IDF-based Fire Alarm Control Panel acts as the MODBUS RTU master - periodically polling STM32 sensor nodes over RS-485 and aggregating telemetry.
 #### 🧩 Components
